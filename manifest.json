@@ -1,3 +1,4 @@
-{ "name": "Time Train", "short_name": "Time Train", "start_url": "./", "scope": "./", "display": "standalone",
+{ "name": "Time Train", "short_name": "Time Train",
+  "description": "A kids' companion to DK's Timelines of Everything: one short video for every spread of the book.", "start_url": "./", "scope": "./", "display": "standalone",
   "background_color": "#1d2550", "theme_color": "#1d2550",
   "icons": [{ "src": "icon.png", "sizes": "512x512", "type": "image/png" }] }

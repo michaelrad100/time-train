@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Time Train</title>
+<meta name="description" content="A kids' companion to DK's Timelines of Everything: one short video for every spread of the book, from the Big Bang to today.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -206,6 +207,16 @@
   .field .go-btn { background: var(--ink); color: #fff; border-radius: 8px; padding: 7px 12px; font-weight: 900; }
   .fine { font-size: 13px; color: var(--muted); }
 
+  /* credit line and About sheet */
+  .credit { text-align: center; font-size: 14px; color: var(--muted); padding: 2px 8px 6px; }
+  .credit button { color: var(--muted); font-weight: 700; }
+  .credit button i, .about i { font-style: italic; }
+  .credit button b { font-weight: inherit; white-space: nowrap; }
+  .credit button span { text-decoration: underline; text-underline-offset: 3px; }
+  .about p { margin: 0 0 12px; font-size: 16px; line-height: 1.5; }
+  .about .book-link { display: inline-flex; margin: 4px 0 14px; font-family: var(--sign); font-size: 16px; background: var(--amber); color: var(--ink);
+    padding: 11px 18px; border-radius: 999px; box-shadow: 0 4px 0 #d69d12; text-decoration: none; }
+
   .toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 14px); transform: translate(-50%, -8px); z-index: 30;
     background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 15px;
     opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; white-space: nowrap; }
@@ -274,6 +285,19 @@
     <div class="all" id="all"></div>
     <div class="all-cap"><span>Big Bang</span><span id="punched"></span><span>Today</span></div>
   </button>
+
+  <footer class="credit"><button id="about-btn">A companion to DK's <i>Timelines of Everything</i> <b>· <span>About</span></b></button></footer>
+
+  <div class="sheet-bg" id="about-sheet"><div class="sheet">
+    <div class="sheet-head"><h3>About Time Train</h3><button class="close" data-close>Done</button></div>
+    <div class="about">
+      <p>Time Train is a companion to <i>Timelines of Everything</i>, a big, beautiful book from DK that walks through history from the Big Bang to today, one two-page spread at a time.</p>
+      <p>I made it for my daughter. Each spread in the book gets one short video that goes a little deeper on what she just read about, in the same order as the book. Finishing a video punches a ticket, and the route map lets her ride to any page she's reading.</p>
+      <p>It works best with the book open next to you. If you don't have it yet, it's well worth finding.</p>
+      <a class="book-link" href="https://www.penguinrandomhouse.com/books/764668/timelines-of-everything-by-dk/" target="_blank" rel="noopener">Find the book</a>
+      <p class="fine">Page numbers follow the 2023 edition. Time Train is a personal project and isn't affiliated with or endorsed by DK. The videos belong to their creators on YouTube.</p>
+    </div>
+  </div></div>
 
   <div class="sheet-bg" id="map-sheet"><div class="sheet">
     <div class="sheet-head"><h3>Route map</h3><button class="close" data-close>Done</button></div>
@@ -369,7 +393,10 @@
     const s = stop(), v = vid(s);
     $("len").textContent = v[3];
     const img = $("thumb");
-    img.onerror = () => { img.onerror = null; img.src = `https://i.ytimg.com/vi/${v[0]}/hqdefault.jpg`; };
+    // Videos without a high-res thumbnail get YouTube's 120px grey placeholder rather than an error, so check the size too.
+    const fallback = () => { img.onerror = img.onload = null; img.src = `https://i.ytimg.com/vi/${v[0]}/hqdefault.jpg`; };
+    img.onerror = fallback;
+    img.onload = () => { if (img.naturalWidth <= 120) fallback(); };
     img.src = `https://i.ytimg.com/vi/${v[0]}/maxresdefault.jpg`;
     $("poster").classList.remove("hidden");
     setBig(false); autoBig = false;
@@ -527,6 +554,7 @@
     moveTo(i, `All aboard for page ${S[i].p}!`);
   });
   $("map-btn").onclick = openMap;
+  $("about-btn").onclick = () => $("about-sheet").classList.add("show");
   $("route").onclick = openMap;
 
   // ---- grown-ups sheet: press and hold the lock for a second ----
