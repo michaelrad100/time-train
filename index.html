@@ -65,6 +65,10 @@
   .board .stop { font-family: var(--sign); font-weight: 400; font-size: clamp(26px, 7.4vw, 40px); line-height: 1.05; margin: 8px 0 12px; text-wrap: balance; }
   .board .stop.arrive { animation: flip .5s ease; }
   @keyframes flip { 0% { transform: rotateX(80deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+  /* when this stop happened, plus how long ago */
+  .board .when { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin: -4px 0 12px; font-size: 17px; font-weight: 800; }
+  .board .when svg { width: 20px; height: 20px; color: var(--amber); flex-shrink: 0; }
+  .board .when span { color: var(--amber); font-weight: 700; }
   .line-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--line); color: #fff; padding: 5px 12px 5px 8px;
     border-radius: 999px; font-weight: 900; font-size: 14px; transition: background .4s; }
   .line-chip i { width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 4px var(--line); }
@@ -240,6 +244,7 @@
   <section class="board" aria-live="polite">
     <div class="row"><span class="label" id="board-label">Next stop</span><span class="page" id="page"></span></div>
     <div class="stop" id="stop-name">All aboard!</div>
+    <div class="when" id="when" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b id="when-label"></b><span id="when-ago"></span></div>
     <span class="line-chip"><i></i><span id="line-name"></span> <small id="line-dates"></small></span>
   </section>
 
@@ -332,8 +337,8 @@
   <div class="toast" id="toast"></div>
 
 <!-- Bump ?v= when these change so iPads pick up the new lists instead of a cached copy. -->
-<script src="videos.js?v=3"></script>
-<script src="facts.js?v=3"></script>
+<script src="videos.js?v=4"></script>
+<script src="facts.js?v=4"></script>
 <script>
   const ERAS = {
     "Prehistory":        { name: "Prehistory Line",  dates: "Before 3000 BCE",   color: "#2fb36b" },
@@ -382,10 +387,21 @@
     const hu = { together: "Grab a grown-up for this stop! It's about a hard part of history.",
                  preview: "A grown-up should watch this one first." }[s.f];
     $("heads-up").classList.toggle("show", !!hu); $("heads-up-text").textContent = hu || "";
+    const w = (window.WHEN || {})[s.p];
+    $("when").hidden = !w;
+    $("when-label").textContent = w ? w[0] : "";
+    $("when-ago").textContent = w && w[1] !== undefined ? agoText(w[0], w[1]) : "";
     const facts = (window.FACTS || {})[s.p];
     $("facts").hidden = !facts;
     $("facts-list").innerHTML = (facts || []).map(f => `<li>${esc(f)}</li>`).join("");
     return true;
+  }
+
+  // "about 680 years ago", rounded more loosely the further back it goes. Spans ("1914 to 1918", "From 1517") say "started".
+  function agoText(label, year) {
+    const n = new Date().getFullYear() - year;
+    const step = n < 100 ? 1 : n < 1000 ? 5 : n < 10000 ? 100 : 500, r = Math.round(n / step) * step;
+    return `${/\bto\b|^From/.test(label) ? "started " : ""}about ${r.toLocaleString("en-US")} years ago`;
   }
 
   function paint(arrive) {
@@ -431,6 +447,7 @@
     $("stop-name").textContent = missed ? "You reached the last page!" : "You rode the whole timeline!";
     $("heads-up").classList.remove("show");
     $("facts").hidden = true;
+    $("when").hidden = true;
     $("poster").classList.add("hidden");
     $("done-title").textContent = "From the Big Bang to today!";
     $("done-msg").textContent = missed ? `${punched.size} tickets punched. Tap the map to ride to the ${missed} ${missed === 1 ? "stop" : "stops"} you haven't seen yet.`
