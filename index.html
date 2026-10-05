@@ -26,7 +26,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
 <style>
   /* The book's timeline as a train route: each era is a colored line, each spread a stop. */
   :root {
@@ -228,9 +228,16 @@
   .credit button i, .about i { font-style: italic; }
   .credit button b { font-weight: inherit; white-space: nowrap; }
   .credit button span { text-decoration: underline; text-underline-offset: 3px; }
-  .about p { margin: 0 0 12px; font-size: 16px; line-height: 1.5; }
-  .about .by { color: var(--ink); font-weight: 800; }
-  .about .book-link { display: inline-flex; margin: 4px 0 14px; font-family: var(--sign); font-size: 16px; background: var(--amber); color: var(--ink);
+  .about { max-width: 620px; font-weight: 400; font-size: 16px; line-height: 1.55; }
+  .about p { margin: 0 0 14px; }
+  .about .lede { font-size: 18px; font-weight: 600; line-height: 1.45; }
+  .about a.by { color: inherit; text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; }
+  .about ul { margin: -4px 0 16px; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .about li { position: relative; padding-left: 20px; }
+  .about li::before { content: ""; position: absolute; left: 3px; top: .6em; width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 2px #e0a106 inset; }
+  .about .foot { border-top: 2px solid var(--rule); margin-top: 6px; padding-top: 16px; }
+  .about .fine { margin: 0; }
+  .about .book-link { display: inline-flex; margin: 0 0 14px; font-family: var(--sign); font-size: 16px; background: var(--amber); color: var(--ink);
     padding: 11px 18px; border-radius: 999px; box-shadow: 0 4px 0 #d69d12; text-decoration: none; }
 
   .toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 14px); transform: translate(-50%, -8px); z-index: 30;
@@ -308,12 +315,21 @@
   <div class="sheet-bg" id="about-sheet"><div class="sheet">
     <div class="sheet-head"><h3>About Time Train</h3><button class="close" data-close>Done</button></div>
     <div class="about">
-      <p>Time Train is a companion to <i>Timelines of Everything</i>, a big, beautiful book from DK that walks through history from the Big Bang to today, one two-page spread at a time.</p>
-      <p>I made it for my daughter. Each spread in the book gets one short video that goes a little deeper on what she just read about, in the same order as the book. Finishing a video punches a ticket, and the route map lets her ride to any page she's reading.</p>
-      <p>It works best with the book open next to you. If you don't have it yet, it's well worth finding.</p>
-      <a class="book-link" href="https://www.penguinrandomhouse.com/books/764668/timelines-of-everything-by-dk/" target="_blank" rel="noopener">Find the book</a>
-      <p>Created by <a class="by" href="https://michaelrad.me" target="_blank" rel="noopener">Michael Rad</a>.</p>
-      <p class="fine">Page numbers follow the 2023 edition. Time Train is a personal project and isn't affiliated with or endorsed by DK. The videos belong to their creators on YouTube.</p>
+      <p class="lede">Time Train is a companion to <i>Timelines of Everything</i>, a big, beautiful book from DK that walks through history from the Big Bang to today, one two-page spread at a time.</p>
+      <p>I'm <a class="by" href="https://michaelrad.me" target="_blank" rel="noopener">Michael Rad</a>, and I made this for my daughter. As we read the timelines together, we kept having questions and wanting to learn more, so I decided to create this companion. It pairs each timeline in the book with a short video that dives a little deeper into the topic.</p>
+      <p>We recommend reading the timeline in the book first, then watching the video that goes with it.</p>
+      <p>A few things I did to make it kid-friendly:</p>
+      <ul>
+        <li>It opens straight to the next stop, so there's nothing to scroll through or choose.</li>
+        <li>The player is designed to keep taps from wandering off to YouTube.</li>
+        <li>Videos stay muted until any ads finish and the real video starts playing.</li>
+        <li>It's one video a day by default, and the grown-up settings sit behind a press-and-hold lock.</li>
+        <li>Stops about harder parts of history are flagged, so a grown-up can watch along.</li>
+      </ul>
+      <div class="foot">
+        <a class="book-link" href="https://www.penguinrandomhouse.com/books/764668/timelines-of-everything-by-dk/" target="_blank" rel="noopener">Find the book</a>
+        <p class="fine">Page numbers follow the 2023 edition. Time Train is a personal project and isn't affiliated with or endorsed by DK. The videos belong to their creators on YouTube.</p>
+      </div>
     </div>
   </div></div>
 
