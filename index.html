@@ -90,14 +90,26 @@
   .poster .len { position: absolute; right: 12px; bottom: 12px; z-index: 1; font-weight: 900; font-size: 13px; color: #fff;
     background: rgba(14,19,48,.7); padding: 4px 10px; border-radius: 999px; }
   .poster.hidden { opacity: 0; }
-  /* Invisible shields over YouTube's title bar and logo, so a tap can't wander off to YouTube. */
+  /* Invisible shields over YouTube's title bar and bottom row (share link, "More videos", logo), so a tap can't wander off to YouTube. */
   .shield { position: absolute; z-index: 2; display: none; }
   .player.playing .shield { display: block; }
   .shield.top { left: 0; right: 0; top: 0; height: 22%; }
-  .shield.logo { right: 0; bottom: 0; width: 120px; height: 52px; }
+  .shield.bottom { left: 0; right: 0; bottom: 0; height: 50px; }
   /* In the last stretch, YouTube shows clickable "watch next" tiles; the whole player is shielded then. */
   .player.endzone .shield.top { height: 100%; }
 
+  /* Big mode: while a video plays it fills the screen. Our covers and shields come along because they live inside .player. */
+  .player.big { position: fixed; inset: 0; z-index: 15; width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; box-shadow: none; background: #000; }
+  body.theater { overflow: hidden; }
+  .size-btn { position: absolute; z-index: 4; right: 12px; top: 12px; width: 48px; height: 48px; border-radius: 14px; display: none; place-items: center;
+    background: rgba(14,19,48,.6); color: #fff; }
+  .player.playing .size-btn { display: grid; }
+  .size-btn svg { width: 24px; height: 24px; }
+  .size-btn:active { transform: scale(.94); }
+  /* Sound stays off until the real video starts, so pre-roll ads play silently. */
+  .hush { position: absolute; z-index: 4; left: 12px; top: 12px; display: none; pointer-events: none; background: rgba(14,19,48,.75); color: #fff;
+    font-weight: 800; font-size: 14px; padding: 7px 12px; border-radius: 999px; }
+  .player.playing.hushed .hush { display: block; }
   .cover { position: absolute; inset: 0; z-index: 3; display: none; flex-direction: column; align-items: center; justify-content: center;
     gap: 12px; padding: 16px; text-align: center; color: #fff; background: rgba(14,19,48,.92); }
   .cover.show { display: flex; animation: fade .3s ease; }
@@ -124,6 +136,14 @@
   .cover.show .stamp { animation: thunk .45s .45s both cubic-bezier(.3,1.6,.5,1); }
   @keyframes slide { from { transform: translateY(30px) scale(.9); opacity: 0; } }
   @keyframes thunk { from { transform: rotate(-12deg) scale(2.4); opacity: 0; } }
+
+  /* "Did you know?" facts for the current stop */
+  .facts { background: var(--card); border: 2px solid var(--rule); border-left: 8px solid var(--line); border-radius: 20px; padding: 14px 18px 12px; transition: border-color .4s; }
+  .facts h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; font-family: var(--sign); font-weight: 400; font-size: 16px; letter-spacing: .03em; }
+  .facts h3 svg { width: 22px; height: 22px; color: #e0a106; }
+  .facts ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .facts li { position: relative; padding-left: 20px; font-size: 16px; line-height: 1.4; }
+  .facts li::before { content: ""; position: absolute; left: 2px; top: .5em; width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
 
   /* route strip for the current line */
   .route { background: var(--card); border: 2px solid var(--rule); border-radius: 20px; padding: 14px 16px 12px; text-align: left; width: 100%; }
@@ -180,6 +200,7 @@
   .seg { margin-left: auto; display: flex; background: var(--rule); border-radius: 10px; padding: 3px; }
   .seg button { padding: 6px 12px; border-radius: 8px; font-weight: 900; }
   .seg button.on { background: var(--ink); color: #fff; }
+  .seg button:disabled { opacity: .35; cursor: default; }
   .field #g-unit { margin-left: 4px; }
   .field input { margin-left: auto; width: 64px; font: inherit; font-weight: 800; padding: 6px 8px; border-radius: 8px; border: 2px solid var(--rule); background: var(--paper); color: var(--ink); }
   .field .go-btn { background: var(--ink); color: #fff; border-radius: 8px; padding: 7px 12px; font-weight: 900; }
@@ -224,7 +245,9 @@
       <div class="len" id="len"></div>
     </div>
     <div class="shield top"></div>
-    <div class="shield logo"></div>
+    <div class="shield bottom"></div>
+    <button class="size-btn" id="size-btn"></button>
+    <div class="hush">Sound comes on when the video starts</div>
     <div class="cover paused" id="paused">
       <button class="big-btn" id="resume"><svg viewBox="0 0 24 24"><path d="M6 3.8v16.4L20 12z"/></svg>Keep going</button>
     </div>
@@ -239,6 +262,11 @@
       <p id="rest-msg"></p>
     </div>
   </div>
+
+  <section class="facts" id="facts" hidden>
+    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>Did you know?</h3>
+    <ul id="facts-list"></ul>
+  </section>
 
   <button class="route" id="route" aria-label="Open the route map">
     <div class="route-head"><b id="route-name"></b><span id="route-count"></span></div>
@@ -258,11 +286,15 @@
     <div class="grown">
       <div class="now" id="g-now"></div>
       <div class="btns">
-        <button class="opt" id="g-backup"></button>
         <button class="opt" id="g-skip">Skip this stop</button>
         <button class="opt" id="g-back">Back one stop</button>
         <button class="opt" id="g-more">One more video today</button>
+        <button class="opt" id="g-big"></button>
       </div>
+      <div class="field">Video
+        <div class="seg" id="g-pick"><button data-k="a">Main</button><button data-k="b">Backup</button><button data-k="d">Deeper</button></div>
+      </div>
+      <p class="fine" id="g-pick-note"></p>
       <div class="field">Videos per day
         <div class="seg" id="g-perday"><button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button></div>
       </div>
@@ -275,7 +307,9 @@
 
   <div class="toast" id="toast"></div>
 
-<script src="videos.js"></script>
+<!-- Bump ?v= when these change so iPads pick up the new lists instead of a cached copy. -->
+<script src="videos.js?v=2"></script>
+<script src="facts.js?v=2"></script>
 <script>
   const ERAS = {
     "Prehistory":        { name: "Prehistory Line",  dates: "Before 3000 BCE",   color: "#2fb36b" },
@@ -286,8 +320,8 @@
     "Modern World":      { name: "Modern Line",      dates: "After 1914",        color: "#ec4899" },
   };
   const ERA_ORDER = Object.keys(ERAS);
-  // window.STOPS rows: [page, era, topic, main, backup, flag]
-  const S = STOPS.map(([p, era, topic, a, b, f]) => ({ p, era, topic, a, b, f }));
+  // window.STOPS rows: [page, era, topic, main, backup, flag, deeper?]
+  const S = STOPS.map(([p, era, topic, a, b, f, d]) => ({ p, era, topic, a, b, f, d }));
 
   // ---- storage (keys prefixed tt- so they never collide with another app on the same site) ----
   const store = {
@@ -296,7 +330,8 @@
   };
   let pos = store.get("pos", 0);                        // index of the stop we're at
   const punched = new Set(store.get("punched", []));    // pages finished
-  const useBackup = new Set(store.get("backup", []));   // pages switched to their backup video
+  // Which video each page plays: "b" = backup, "d" = deeper (Nat Geo, Kurzgesagt...); main otherwise.
+  const pick = store.get("pick", Object.fromEntries(store.get("backup", []).map(p => [p, "b"])));
   let perDay = store.get("perDay", 1);
   const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const today = () => { const t = store.get("today", {}); return t.d === dayKey() ? t : { d: dayKey(), n: 0, extra: 0 }; };
@@ -304,8 +339,10 @@
 
   const $ = (id) => document.getElementById(id);
   const stop = () => S[pos];
-  const vid = (s) => useBackup.has(s.p) ? s.b : s.a;
+  const vid = (s) => (pick[s.p] && s[pick[s.p]]) || s.a;
+  const setPick = (s, k) => { if (k === "a") delete pick[s.p]; else pick[s.p] = k; store.set("pick", pick); };
   let player = null, ready = false, timer = null, finished = false, reached = false;
+  let big = store.get("big", true), autoBig = false, hushed = false;
 
   // ---- board + route ----
   function paintBoard(arrive) {
@@ -321,6 +358,9 @@
     const hu = { together: "Grab a grown-up for this stop! It's about a hard part of history.",
                  preview: "A grown-up should watch this one first." }[s.f];
     $("heads-up").classList.toggle("show", !!hu); $("heads-up-text").textContent = hu || "";
+    const facts = (window.FACTS || {})[s.p];
+    $("facts").hidden = !facts;
+    $("facts-list").innerHTML = (facts || []).map(f => `<li>${esc(f)}</li>`).join("");
     return true;
   }
 
@@ -332,9 +372,10 @@
     img.onerror = () => { img.onerror = null; img.src = `https://i.ytimg.com/vi/${v[0]}/hqdefault.jpg`; };
     img.src = `https://i.ytimg.com/vi/${v[0]}/maxresdefault.jpg`;
     $("poster").classList.remove("hidden");
+    setBig(false); autoBig = false;
     showCover(canWatch() ? null : "rest");
     $("rest-msg").textContent = `The Time Train leaves again tomorrow. Next stop: ${s.topic}.`;
-    if (ready) player.cueVideoById(v[0]);
+    if (ready) { player.cueVideoById(v[0]); hush(); }
     finished = reached = false;
     paintRoute();
   }
@@ -362,6 +403,7 @@
     const missed = S.length - punched.size;
     $("stop-name").textContent = missed ? "You reached the last page!" : "You rode the whole timeline!";
     $("heads-up").classList.remove("show");
+    $("facts").hidden = true;
     $("poster").classList.add("hidden");
     $("done-title").textContent = "From the Big Bang to today!";
     $("done-msg").textContent = missed ? `${punched.size} tickets punched. Tap the map to ride to the ${missed} ${missed === 1 ? "stop" : "stops"} you haven't seen yet.`
@@ -387,6 +429,7 @@
     const nxt = S.findIndex((x, i) => i > pos && !punched.has(x.p));
     pos = nxt < 0 ? S.length : nxt; store.set("pos", pos);
     $("player").classList.remove("playing", "endzone");
+    setBig(false); unhush();
     $("t-line").textContent = ERAS[s.era].name.toUpperCase();
     $("t-stop").textContent = s.topic;
     $("t-page").textContent = `BOOK PAGE ${s.p}`;
@@ -409,6 +452,21 @@
     paintRoute();
   }
   const esc = (x) => String(x).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ---- big mode ----
+  const GROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>`;
+  const SHRINK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>`;
+  function setBig(on) {
+    $("player").classList.toggle("big", on); document.body.classList.toggle("theater", on);
+    $("size-btn").innerHTML = on ? SHRINK : GROW; $("size-btn").setAttribute("aria-label", on ? "Smaller video" : "Bigger video");
+  }
+  $("size-btn").onclick = () => setBig(!$("player").classList.contains("big"));
+
+  // ---- sound gate: muted until the chosen video itself is playing ----
+  // During a pre-roll ad the video's own clock sits at 0, so sound comes on once it moves and the length is the one we expect.
+  const secs = (len) => len.split(":").reduce((t, n) => t * 60 + +n, 0);
+  function hush() { if (!ready) return; player.mute(); hushed = true; $("player").classList.add("hushed"); }
+  function unhush() { if (!hushed) return; hushed = false; $("player").classList.remove("hushed"); if (ready) player.unMute(); }
 
   $("onward").onclick = () => { showCover(null); paint(true); };
   $("resume").onclick = () => { showCover(null); if (ready) player.playVideo(); };
@@ -499,8 +557,11 @@
         `<a href="https://www.youtube.com/watch?v=${v[0]}" target="_blank" rel="noopener">${esc(v[1])}</a> · ${esc(v[2])} · ${v[3]}` +
         `<br><span class="fine">${t.n} watched today of ${perDay + t.extra} allowed · ${punched.size} of ${S.length} tickets</span>` +
         (NOTES[s.f] ? `<div class="note">${NOTES[s.f]}</div>` : "");
-      $("g-backup").textContent = useBackup.has(s.p) ? "Use the main video" : "Use the backup video";
+      const k = pick[s.p] && s[pick[s.p]] ? pick[s.p] : "a";
+      document.querySelectorAll("#g-pick button").forEach(b => { b.classList.toggle("on", b.dataset.k === k); b.disabled = !s[b.dataset.k]; });
+      $("g-pick-note").textContent = s.d ? `Deeper: ${s.d[1]} (${s.d[2]}, ${s.d[3]}). Grown-up level, often worth a try.` : "No deeper video for this stop.";
     } else $("g-now").innerHTML = "<b>End of the line.</b> Every stop is done.";
+    $("g-big").textContent = big ? "Keep videos small" : "Make videos big";
     document.querySelectorAll("#g-perday button").forEach(b => b.classList.toggle("on", +b.dataset.n === perDay));
     setUnit(goUnit);
     $("grown-sheet").classList.add("show");
@@ -510,11 +571,12 @@
   document.querySelectorAll(".sheet-bg").forEach(bg => bg.addEventListener("click", (e) => { if (e.target === bg) closeSheets(); }));
 
   const moveTo = (i, msg) => { pos = Math.max(0, Math.min(S.length, i)); store.set("pos", pos); closeSheets(); paint(true); if (msg) toast(msg); };
-  $("g-backup").onclick = () => {
-    const s = stop(); if (!s) return;
-    useBackup.has(s.p) ? useBackup.delete(s.p) : useBackup.add(s.p); store.set("backup", [...useBackup]);
-    closeSheets(); paint(true); toast(useBackup.has(s.p) ? "Switched to the backup video" : "Back to the main video");
-  };
+  document.querySelectorAll("#g-pick button").forEach(b => b.onclick = () => {
+    const s = stop(); if (!s || !s[b.dataset.k]) return;
+    setPick(s, b.dataset.k);
+    closeSheets(); paint(true); toast({ a: "Main video", b: "Backup video", d: "Deeper video" }[b.dataset.k]);
+  });
+  $("g-big").onclick = () => { big = !big; store.set("big", big); closeSheets(); toast(big ? "Videos fill the screen" : "Videos stay small"); };
   $("g-skip").onclick = () => moveTo(pos + 1, "Skipped ahead one stop");
   $("g-back").onclick = () => moveTo(pos - 1, "Went back one stop");
   $("g-more").onclick = () => { const t = today(); t.extra++; store.set("today", t); closeSheets(); paint(true); toast("One more stop unlocked for today"); };
@@ -544,6 +606,7 @@
   // A new day unlocks the next stop if the app was left open overnight.
   document.addEventListener("visibilitychange", () => { if (!document.hidden && $("rest").classList.contains("show") && canWatch()) paint(); });
 
+  setBig(false);
   paint();
 
   // ---- YouTube player ----
@@ -554,10 +617,13 @@
       // Plays inside the app (no full screen) so the covers and shields stay on top of YouTube's player.
       playerVars: { playsinline: 1, rel: 0, fs: 0, modestbranding: 1, iv_load_policy: 3, disablekb: 1 },
       events: {
-        onReady: () => { ready = true; },
+        onReady: () => { ready = true; hush(); },
         onStateChange: (e) => {
           const St = YT.PlayerState, p = $("player");
-          if (e.data === St.PLAYING || e.data === St.BUFFERING) { $("poster").classList.add("hidden"); p.classList.add("playing"); showCover(null); }
+          if (e.data === St.PLAYING || e.data === St.BUFFERING) {
+            $("poster").classList.add("hidden"); p.classList.add("playing"); showCover(null);
+            if (!autoBig) { autoBig = true; if (big) setBig(true); }
+          }
           if (e.data === St.ENDED || (e.data === St.PAUSED && reached)) return finish();
           // Pausing covers YouTube's "more videos" shelf with our own Keep going button.
           if (e.data === St.PAUSED) showCover("paused");
@@ -566,14 +632,18 @@
             const dur = player.getDuration(), now = player.getCurrentTime();
             if (!dur) return;
             if (now / dur >= 0.9) reached = true;
+            const want = stop() ? secs(vid(stop())[3]) : dur;
+            if (hushed && now >= 1 && (Math.abs(dur - want) <= Math.max(4, want * 0.06) || now >= 15)) unhush();
             p.classList.toggle("endzone", dur - now <= 22);
           }, 1000);
         },
-        // 100 = removed, 101/150 = embedding turned off: switch to the backup, then skip if that fails too.
+        // 100 = removed, 101/150 = embedding turned off: try the backup, then the deeper video, then skip.
         onError: (e) => {
           const s = stop(); if (!s || ![100, 101, 150].includes(e.data)) return;
-          if (!useBackup.has(s.p)) { useBackup.add(s.p); store.set("backup", [...useBackup]); paint(); }
-          else { useBackup.delete(s.p); store.set("backup", [...useBackup]); moveTo(pos + 1, "That video's gone. Skipping ahead."); }
+          const order = ["a", "b", "d"], at = order.indexOf(pick[s.p] && s[pick[s.p]] ? pick[s.p] : "a");
+          const next = order.slice(at + 1).find(k => s[k]);
+          if (next) { setPick(s, next); paint(); }
+          else { setPick(s, "a"); moveTo(pos + 1, "That video's gone. Skipping ahead."); }
         },
       },
     });

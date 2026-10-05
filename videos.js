@@ -1,14 +1,15 @@
 // One video per spread of DK's Timelines of Everything (2023 edition), in page order.
-// [page, era, topic, [mainId, title, channel, length], [backupId, title, channel, length], flag]
+// [page, era, topic, [mainId, title, channel, length], [backupId, title, channel, length], flag, [deeperId, title, channel, length]?]
+// deeper (optional) = a grown-up-level pick from channels like National Geographic or Kurzgesagt; chosen from the grown-ups panel.
 // flag: together = watch with a grown-up (war, disaster, loss); preview = a grown-up watches first; thin/older/region = notes for the parent.
 window.STOPS = [
-  [12, "Prehistory", "The story of the universe", ["KaWCDihlK5Y", "What Was the Big Bang and Other Space Questions Answered!", "SciShow Kids", "7:59"], ["GncYOf29uc4", "What Is The Big Bang Theory?", "Peekaboo Kidz", "5:30"], ""],
+  [12, "Prehistory", "The story of the universe", ["GncYOf29uc4", "What Is The Big Bang Theory?", "Peekaboo Kidz", "5:30"], ["i42otfB4xBk", "Where Did Earth Come From?", "SciShow Kids", "4:21"], "", ["wNDGgL73ihY", "The Beginning of Everything -- The Big Bang", "Kurzgesagt – In a Nutshell", "5:55"]],
   [14, "Prehistory", "Life on Earth", ["bIaq4HUD3jo", "The Very First Living Thing!", "SciShow Kids", "5:44"], ["de1hiS_XjWg", "The mysterious origins of life on Earth", "TED-Ed", "4:57"], ""],
   [16, "Prehistory", "The age of dinosaurs", ["2rcS9JuFICY", "The Very Long Time of the Dinosaurs!", "SciShow Kids", "5:57"], ["dktnOPfE7Dc", "Dinosaurs for Kids", "Learn Bright", "9:14"], ""],
   [18, "Prehistory", "End of the dinosaurs", ["oXwoy-Ce1ZE", "What Happened to the Dinosaurs?", "SciShow Kids", "4:39"], ["ogLFEq1X0RM", "Extinction for Kids", "Learn Bright", "5:53"], ""],
-  [20, "Prehistory", "Human ancestors", ["mmCGDsFfl2c", "What Is Evolution & types of HUMANS", "Peekaboo Kidz", "6:25"], ["_w3X87gCNjg", "Our Ancient Human Cousins!", "SciShow Kids", "4:29"], ""],
+  [20, "Prehistory", "Human ancestors", ["_w3X87gCNjg", "Our Ancient Human Cousins!", "SciShow Kids", "4:29"], ["mmCGDsFfl2c", "What Is Evolution & types of HUMANS", "Peekaboo Kidz", "6:25"], ""],
   [22, "Prehistory", "Agriculture", ["bhzQFIZuNFY", "Mankind: The Story of All of Us: Birth of Farming", "HISTORY", "3:18"], ["teavjYI9pdM", "From Hunter Gatherer to Farmer...in five minutes or less", "TheMrGranito", "3:52"], ""],
-  [24, "Prehistory", "Working with metals", ["jLsWmAR0m_E", "What was the Bronze Age?", "Egham Museum", "3:17"], ["DsUID4Oz73o", "The Bronze Age Explained", "Bedtime History", "4:15"], ""],
+  [24, "Prehistory", "Working with metals", ["DsUID4Oz73o", "The Bronze Age Explained", "Bedtime History", "4:15"], ["jLsWmAR0m_E", "What was the Bronze Age?", "Egham Museum", "3:17"], ""],
   [26, "Prehistory", "Towns and cities", ["IAQAAJo1fI0", "The History of Civilization for Kids: How Civilization Began", "Free School", "4:45"], ["XBk9KywTIgk", "The rise and fall of history’s first empire", "TED-Ed", "5:38"], ""],
   [28, "Prehistory", "The story of the wheel", ["6UfoM4UbLak", "Invention of Wheel", "Peekaboo Kidz", "7:15"], ["XzG1aPw7YBc", "The Wheel: great inventions that changed history", "Happy Learning English", "3:01"], ""],
   [30, "Prehistory", "The written word", ["j7nM3YOwu00", "Young explorers: a brief history of writing", "The British Museum", "6:00"], ["dbu9yhzbpy4", "The History of Written Language", "Happy Learning English", "4:29"], ""],
