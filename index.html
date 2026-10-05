@@ -155,15 +155,17 @@
   .era h4 { margin: 0 0 4px; display: flex; align-items: center; gap: 10px; font-family: var(--sign); font-weight: 400; font-size: 16px; }
   .era h4 i { width: 34px; height: 8px; border-radius: 4px; background: var(--c); }
   .era h4 small { font-family: var(--body); font-weight: 800; color: var(--muted); font-size: 13px; margin-left: auto; }
-  .stops { list-style: none; margin: 0; padding: 0 0 0 4px; position: relative; }
+  .stops { list-style: none; margin: 0; padding: 0 0 0 4px; position: relative; -webkit-user-select: none; user-select: none; }
   .stops::before { content: ""; position: absolute; left: 61px; top: 10px;   /* page number + gap + half a dot */ bottom: 10px; width: 6px; border-radius: 3px; background: var(--c); opacity: .3; }
-  .stops li { position: relative; display: flex; align-items: center; gap: 12px; padding: 5px 0; font-size: 15px; }
+  .stops li { position: relative; display: flex; align-items: center; gap: 12px; padding: 8px 6px 8px 0; font-size: 15px; border-radius: 12px; cursor: pointer; }
+  .stops li:active { background: var(--rule); }
   .stops li i { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 4px var(--c); z-index: 1; }
   .stops li.done i { background: var(--c); }
   .stops li.done { color: var(--ink); }
   .stops li:not(.done) { color: var(--muted); }
   .stops li.here { font-weight: 900; color: var(--ink); }
   .stops li.here i { box-shadow: inset 0 0 0 5px var(--ink), 0 0 0 4px rgba(255,200,69,.8); }
+  .map-hint { margin: 0; color: var(--muted); font-size: 15px; }
   .stops li em { font-style: normal; font-size: 12px; color: var(--muted); width: 36px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; }
 
   .grown { display: grid; gap: 10px; }
@@ -247,6 +249,7 @@
 
   <div class="sheet-bg" id="map-sheet"><div class="sheet">
     <div class="sheet-head"><h3>Route map</h3><button class="close" data-close>Done</button></div>
+    <p class="map-hint">Tap any stop to ride there.</p>
     <div id="map"></div>
   </div></div>
 
@@ -356,11 +359,13 @@
   function endOfLine() {
     $("board-label").textContent = "End of the line";
     $("page").textContent = "";
-    $("stop-name").textContent = "You rode the whole timeline!";
+    const missed = S.length - punched.size;
+    $("stop-name").textContent = missed ? "You reached the last page!" : "You rode the whole timeline!";
     $("heads-up").classList.remove("show");
     $("poster").classList.add("hidden");
     $("done-title").textContent = "From the Big Bang to today!";
-    $("done-msg").textContent = `${punched.size} tickets punched. What a trip.`;
+    $("done-msg").textContent = missed ? `${punched.size} tickets punched. Tap the map to ride to the ${missed} ${missed === 1 ? "stop" : "stops"} you haven't seen yet.`
+                                       : `${punched.size} tickets punched. What a trip.`;
     $("onward").hidden = true;
     showCover("done");
     paintRoute();
@@ -378,7 +383,9 @@
     finished = true;
     punched.add(s.p); store.set("punched", [...punched]);
     const t = today(); t.n++; store.set("today", t);
-    pos++; store.set("pos", pos);
+    // On to the next stop without a ticket, so riding out of order never repeats one.
+    const nxt = S.findIndex((x, i) => i > pos && !punched.has(x.p));
+    pos = nxt < 0 ? S.length : nxt; store.set("pos", pos);
     $("player").classList.remove("playing", "endzone");
     $("t-line").textContent = ERAS[s.era].name.toUpperCase();
     $("t-stop").textContent = s.topic;
@@ -447,13 +454,20 @@
       const e = ERAS[era];
       return `<section class="era" style="--c:${e.color}"><h4><i></i>${e.name}<small>${e.dates}</small></h4><ol class="stops">` +
         S.filter(x => x.era === era).map(x =>
-          `<li class="${punched.has(x.p) ? "done" : ""}${x === stop() ? " here" : ""}"><em>p.${x.p}</em><i></i>${esc(x.topic)}</li>`).join("") +
+          `<li data-i="${S.indexOf(x)}" class="${punched.has(x.p) ? "done" : ""}${x === stop() ? " here" : ""}"><em>p.${x.p}</em><i></i>${esc(x.topic)}</li>`).join("") +
         `</ol></section>`;
     }).join("");
     $("map-sheet").classList.add("show");
     const here = $("map").querySelector(".here");
     if (here) here.scrollIntoView({ block: "center" });
   }
+  // Kids read the book out of order, so any stop on the map is a tap away. The train carries on from there.
+  $("map").addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-i]"); if (!li) return;
+    const i = +li.dataset.i;
+    if (i === pos) return closeSheets();
+    moveTo(i, `All aboard for page ${S[i].p}!`);
+  });
   $("map-btn").onclick = openMap;
   $("route").onclick = openMap;
 
