@@ -289,6 +289,15 @@
   .intro .go-wrap { display: grid; justify-items: center; gap: 10px; padding-top: 4px; }
   .intro .go-wrap .fine { text-align: center; max-width: 40ch; }
   .about .again { margin: 0 0 14px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; display: block; }
+  /* optional email sign-in */
+  .credit .save-link { display: inline-block; margin-top: 4px; font-weight: 800; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .link-btn { font-weight: 800; font-size: 15px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .save-form { display: grid; gap: 12px; margin: 0 0 12px; justify-items: start; }
+  .save-form input { width: 100%; font: inherit; font-size: 18px; font-weight: 700; padding: 12px 14px; border-radius: 14px; border: 2px solid var(--rule); background: var(--card); color: var(--ink); }
+  .save-form input:focus { outline: 3px solid var(--amber); outline-offset: 1px; }
+  .save-form .big-btn:disabled { opacity: .6; }
+  .save-err { margin: 0 0 12px; color: #b42318; font-weight: 800; }
+  .about .foot .fine + .fine { margin-top: 8px; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
@@ -356,7 +365,7 @@
     <div class="all-cap"><span>Big Bang</span><span id="punched"></span><span>Today</span></div>
   </button>
 
-  <footer class="credit"><button id="about-btn">A companion to DK's <i>Timelines of Everything</i> <b>· <span>About</span></b></button></footer>
+  <footer class="credit"><button id="about-btn">A companion to DK's <i>Timelines of Everything</i> <b>· <span>About</span></b></button><br><button class="save-link" id="save-btn">Save your spot</button></footer>
 
   <div class="sheet-bg" id="about-sheet"><div class="sheet">
     <div class="sheet-head"><h3>About Time Train</h3><button class="close" data-close>Done</button></div>
@@ -371,11 +380,34 @@
         <li>Videos stay muted until any ads finish and the real video starts playing.</li>
         <li>It's one video a day by default, and the grown-up settings sit behind a press-and-hold lock.</li>
         <li>Stops about harder parts of history are flagged, so a grown-up can watch along.</li>
+        <li>Saving your spot is optional and only needs an email, which is never stored. It's turned into a scrambled code before anything is saved.</li>
       </ul>
       <button class="again" id="intro-again">See how the ride works</button>
       <div class="foot">
         <a class="book-link" href="https://www.penguinrandomhouse.com/books/764668/timelines-of-everything-by-dk/" target="_blank" rel="noopener">Find the book</a>
         <p class="fine">Created by <a class="by" href="https://michaelrad.me" target="_blank" rel="noopener">Michael Rad</a>. Page numbers follow the 2023 edition. Time Train is a personal project and isn't affiliated with or endorsed by DK. The videos belong to their creators on YouTube.</p>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="sheet-bg" id="save-sheet"><div class="sheet">
+    <div class="sheet-head"><h3>Save your spot</h3><button class="close" data-close>Done</button></div>
+    <div class="about">
+      <div id="save-out">
+        <p class="lede">Type an email to save your tickets and your spot. Use the same email on any device or browser to pick up right where you left off.</p>
+        <form class="save-form" id="save-form" novalidate>
+          <input id="save-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Email address" aria-label="Email address">
+          <button class="big-btn" id="save-go" type="submit">Save my spot</button>
+        </form>
+        <p class="save-err" id="save-err" hidden></p>
+      </div>
+      <div id="save-in" hidden>
+        <p class="lede">Your spot is saved to <b id="save-hint"></b>. Tickets and your stop save as you go, and the same email on another device picks up right here.</p>
+        <p><button class="link-btn" id="save-signout">Sign out on this device</button></p>
+      </div>
+      <div class="foot">
+        <p class="fine">Saving your spot is optional. Without it, Time Train works the same and keeps progress on this device only.</p>
+        <p class="fine">There's no password, so anyone who types the same email sees the same tickets and spot. Think of it as a bookmark rather than a lock. Your email is never stored: it's turned into a scrambled code that can't be turned back into the address, and only that code and your progress (tickets, current stop and grown-up settings) are saved.</p>
       </div>
     </div>
   </div></div>
@@ -434,6 +466,7 @@
       <div class="first" id="intro-first"></div>
       <div class="go-wrap">
         <button class="big-btn" id="intro-go">All aboard! <svg viewBox="0 0 24 24"><path d="M6 3.8v16.4L20 12z"/></svg></button>
+        <button class="link-btn" id="intro-save">Riding on another device? Pick up where you left off</button>
         <p class="fine">Grown-ups: press and hold the lock button for settings, like how many videos a day.</p>
       </div>
     </div>
@@ -460,8 +493,12 @@
   // ---- storage (keys prefixed tt- so they never collide with another app on the same site) ----
   const store = {
     get(k, d) { try { return JSON.parse(localStorage.getItem("tt-" + k)) ?? d; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem("tt-" + k, JSON.stringify(v)); } catch {} },
+    set(k, v) { try { localStorage.setItem("tt-" + k, JSON.stringify(v)); } catch {} if (k in SYNCED && !quiet) changed(k); },
   };
+  // Progress that follows a signed-in rider to other devices, and the timestamp each one bumps (newest wins).
+  const SYNCED = { pos: "posAt", punched: null, today: null, perDay: "setAt", mode: "setAt", pick: "setAt", "pick-adult": "setAt" };
+  let quiet = false, account = store.get("account", null);   // account = { key, hint }; the email itself is never kept
+  function changed(k) { if (SYNCED[k]) store.set(SYNCED[k], Date.now()); queuePush(); }
   let pos = store.get("pos", 0);                        // index of the stop we're at
   const punched = new Set(store.get("punched", []));    // pages finished
   // Kid or grown-up: grown-ups get the deeper video (Nat Geo, Kurzgesagt...) where a stop has one, the kid video otherwise.
@@ -825,6 +862,79 @@
   $("intro-again").onclick = openIntro;
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("intro").hidden) closeIntro(); });
   if (!store.get("intro", false) && punched.size === 0) openIntro();
+
+  // ---- optional email sign-in: the same email on any device picks up the same tickets and spot ----
+  // The server turns the email into a key and stores only that; this device keeps the key and a masked hint.
+  const SYNC_URL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? "http://localhost:8791" : "https://time-train-sync-production.up.railway.app";
+  const record = () => ({
+    pos: { p: stop() ? stop().p : 0, at: store.get("posAt", 0) },
+    punched: [...punched], today: today(),
+    settings: { perDay, mode, pick: picks.kid, pickAdult: picks.adult, at: store.get("setAt", 0) },
+  });
+  async function call(route, body) {
+    const r = await fetch(SYNC_URL + route, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(j.error || "Couldn't reach Time Train. Try again in a moment."), { status: r.status });
+    return j;
+  }
+  // Take the combined record from the server into this device.
+  function apply(d) {
+    quiet = true;
+    const i = d.pos.p ? S.findIndex(x => x.p === d.pos.p) : S.length;
+    if (i >= 0 && d.pos.at >= store.get("posAt", 0)) { pos = i; store.set("pos", pos); store.set("posAt", d.pos.at); }
+    punched.clear(); d.punched.forEach(p => punched.add(p)); store.set("punched", [...punched]);
+    if (d.today.d) store.set("today", d.today);
+    const st = d.settings;
+    if (st.at > store.get("setAt", 0)) {
+      perDay = st.perDay; mode = st.mode; picks.kid = st.pick; picks.adult = st.pickAdult;
+      store.set("perDay", perDay); store.set("mode", mode); store.set("pick", picks.kid); store.set("pick-adult", picks.adult); store.set("setAt", st.at);
+    }
+    quiet = false;
+  }
+  // Never move the train out from under a video that's playing, paused or just finished.
+  const busy = () => $("player").classList.contains("playing") || ["paused", "done"].some(id => $(id).classList.contains("show"));
+  let pushTimer = 0;
+  function queuePush() { if (!account) return; clearTimeout(pushTimer); pushTimer = setTimeout(() => syncNow(false), 1500); }
+  async function syncNow(pull) {
+    if (!account) return;
+    try {
+      const { data } = await call("/sync", { key: account.key, data: record() });
+      if (pull && !busy()) { apply(data); paint(); }
+    } catch (e) { if (e.status === 401) signOut(); }
+  }
+  function paintSave() {
+    $("save-btn").textContent = account ? `Spot saved to ${account.hint}` : "Save your spot";
+    $("save-out").hidden = !!account; $("save-in").hidden = !account;
+    $("save-hint").textContent = account ? account.hint : "";
+  }
+  function openSave() {
+    if (!$("intro").hidden) closeIntro();
+    closeSheets(); paintSave(); $("save-err").hidden = true;
+    $("save-sheet").classList.add("show");
+  }
+  function signOut() { account = null; store.set("account", null); paintSave(); }
+  const mask = (email) => { const [u, d] = email.trim().toLowerCase().split("@"); return `${u[0]}•••@${d}`; };
+  $("save-form").onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $("save-email").value.trim(), err = $("save-err");
+    err.hidden = true;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "That doesn't look like an email address."; err.hidden = false; return; }
+    $("save-go").disabled = true;
+    try {
+      const { key, known, data } = await call("/signin", { email, data: record() });
+      account = { key, hint: mask(email) }; store.set("account", account);
+      apply(data); $("save-email").value = "";
+      closeSheets(); paint(true); paintSave();
+      toast(known ? "Welcome back aboard!" : "Your spot is saved");
+    } catch (e2) { err.textContent = e2.message; err.hidden = false; }
+    finally { $("save-go").disabled = false; }
+  };
+  $("save-btn").onclick = openSave;
+  $("intro-save").onclick = openSave;
+  $("save-signout").onclick = () => { signOut(); closeSheets(); toast("Signed out on this device"); };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) syncNow(true); });
+  paintSave();
+  syncNow(true);
 
   // ---- YouTube player ----
   window.onYouTubeIframeAPIReady = () => {
