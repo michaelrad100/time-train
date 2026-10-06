@@ -72,7 +72,8 @@
   .board::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: var(--line); transition: background .4s; }
   .board .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .board .label { font-family: var(--sign); color: var(--amber); font-size: 14px; letter-spacing: .06em; }
-  .board .page { font-size: 14px; color: #c6cbe6; white-space: nowrap; }
+  .board .page { font-size: 14px; color: #c6cbe6; white-space: nowrap; margin-left: auto; }
+  .board .mode-tag { font-size: 11px; font-weight: 900; letter-spacing: .08em; color: var(--board); background: #c6cbe6; padding: 2px 8px; border-radius: 999px; }
   .board .stop { font-family: var(--sign); font-weight: 400; font-size: clamp(26px, 7.4vw, 40px); line-height: 1.05; margin: 8px 0 12px; text-wrap: balance; }
   .board .stop.arrive { animation: flip .5s ease; }
   @keyframes flip { 0% { transform: rotateX(80deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
@@ -122,8 +123,20 @@
   .player.playing .size-btn { display: grid; }
   .size-btn svg { width: 24px; height: 24px; }
   .size-btn:active { transform: scale(.94); }
+  /* captions on/off, next to the size button */
+  .cc-btn { right: 70px; font-family: var(--sign); font-size: 15px; letter-spacing: .04em; color: rgba(255,255,255,.6); }
+  .cc-btn.on { background: #fff; color: var(--ink); }
+  /* During an ad the bottom-right corner, where YouTube's Skip button sits, stays open to taps. */
+  .player.ad .shield.bottom { right: 55%; }
+  /* Skippable ads offer Skip after about 5 seconds, so a bouncing tag points at the corner from then on. */
+  .skip-hint { position: absolute; z-index: 4; right: 16px; bottom: min(100px, 30%); display: none; flex-direction: column; align-items: center; pointer-events: none;
+    font-family: var(--sign); font-size: 19px; color: var(--ink); animation: nudge 1s ease-in-out infinite; }
+  .skip-hint span { background: var(--amber); padding: 9px 16px; border-radius: 999px; box-shadow: 0 4px 0 #d69d12, 0 8px 18px rgba(0,0,0,.4); }
+  .skip-hint svg { width: 36px; height: 36px; margin-top: 4px; color: var(--amber); filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+  .player.playing.ad.skippy .skip-hint { display: flex; }
+  @keyframes nudge { 50% { transform: translateY(10px); } }
   /* Sound stays off until the real video starts, so pre-roll ads play silently. */
-  .hush { position: absolute; z-index: 4; left: 12px; top: 12px; display: none; pointer-events: none; background: rgba(14,19,48,.75); color: #fff;
+  .hush { position: absolute; z-index: 4; left: 12px; top: 12px; max-width: calc(100% - 150px); display: none; pointer-events: none; background: rgba(14,19,48,.75); color: #fff;
     font-weight: 800; font-size: 14px; padding: 7px 12px; border-radius: 999px; }
   .player.playing.hushed .hush { display: block; }
   .cover { position: absolute; inset: 0; z-index: 3; display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -261,7 +274,7 @@
   </div>
 
   <section class="board" aria-live="polite">
-    <div class="row"><span class="label" id="board-label">Next stop</span><span class="page" id="page"></span></div>
+    <div class="row"><span class="label" id="board-label">Next stop</span><span class="mode-tag" id="mode-tag" hidden>GROWN-UP</span><span class="page" id="page"></span></div>
     <div class="stop" id="stop-name">All aboard!</div>
     <div class="when" id="when" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b id="when-label"></b><span id="when-ago"></span></div>
     <span class="line-chip"><i></i><span id="line-name"></span> <small id="line-dates"></small></span>
@@ -282,7 +295,9 @@
     <div class="shield top"></div>
     <div class="shield bottom"></div>
     <button class="size-btn" id="size-btn"></button>
+    <button class="size-btn cc-btn" id="cc-btn">CC</button>
     <div class="hush">Sound comes on when the video starts</div>
+    <div class="skip-hint"><span>Tap Skip</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5 12l7 7 7-7"/></svg></div>
     <div class="cover paused" id="paused">
       <button class="big-btn" id="resume"><svg viewBox="0 0 24 24"><path d="M6 3.8v16.4L20 12z"/></svg>Keep going</button>
     </div>
@@ -343,6 +358,10 @@
     <div class="sheet-head"><h3>Grown-ups</h3><button class="close" data-close>Done</button></div>
     <div class="grown">
       <div class="now" id="g-now"></div>
+      <div class="field">Who's watching
+        <div class="seg" id="g-mode"><button data-m="kid">Kid</button><button data-m="adult">Grown-up</button></div>
+      </div>
+      <p class="fine" id="g-mode-note"></p>
       <div class="btns">
         <button class="opt" id="g-skip">Skip this stop</button>
         <button class="opt" id="g-back">Back one stop</button>
@@ -388,8 +407,11 @@
   };
   let pos = store.get("pos", 0);                        // index of the stop we're at
   const punched = new Set(store.get("punched", []));    // pages finished
-  // Which video each page plays: "b" = backup, "d" = deeper (Nat Geo, Kurzgesagt...); main otherwise.
-  const pick = store.get("pick", Object.fromEntries(store.get("backup", []).map(p => [p, "b"])));
+  // Kid or grown-up: grown-ups get the deeper video (Nat Geo, Kurzgesagt...) where a stop has one, the kid video otherwise.
+  let mode = store.get("mode", "kid");
+  const ORDER = { kid: ["a", "b", "d"], adult: ["d", "a", "b"] };   // default first, then fallbacks if a video goes missing
+  // Per-page overrides for each mode: "a" = main, "b" = backup, "d" = deeper.
+  const picks = { kid: store.get("pick", Object.fromEntries(store.get("backup", []).map(p => [p, "b"]))), adult: store.get("pick-adult", {}) };
   let perDay = store.get("perDay", 1);
   const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const today = () => { const t = store.get("today", {}); return t.d === dayKey() ? t : { d: dayKey(), n: 0, extra: 0 }; };
@@ -397,10 +419,14 @@
 
   const $ = (id) => document.getElementById(id);
   const stop = () => S[pos];
-  const vid = (s) => (pick[s.p] && s[pick[s.p]]) || s.a;
-  const setPick = (s, k) => { if (k === "a") delete pick[s.p]; else pick[s.p] = k; store.set("pick", pick); };
+  const pickKey = (s) => { const k = picks[mode][s.p]; return k && s[k] ? k : ORDER[mode].find(k => s[k]); };
+  const vid = (s) => s[pickKey(s)];
+  const setPick = (s, k) => {
+    const m = picks[mode]; if (k === ORDER[mode][0]) delete m[s.p]; else m[s.p] = k;
+    store.set(mode === "kid" ? "pick" : "pick-adult", m);
+  };
   let player = null, ready = false, timer = null, finished = false, reached = false;
-  let big = store.get("big", true), autoBig = false, hushed = false;
+  let big = store.get("big", true), autoBig = false, hushed = false, adSince = 0, cc = store.get("cc", false);
 
   // ---- board + route ----
   function paintBoard(arrive) {
@@ -410,6 +436,7 @@
     document.documentElement.style.setProperty("--line", e.color);
     $("board-label").textContent = canWatch() ? "Next stop" : "Tomorrow's stop";
     $("page").textContent = `Book page ${s.p}`;
+    $("mode-tag").hidden = mode !== "adult";
     $("stop-name").textContent = s.topic;
     if (arrive) { const n = $("stop-name"); n.classList.remove("arrive"); void n.offsetWidth; n.classList.add("arrive"); }
     $("line-name").textContent = e.name; $("line-dates").textContent = e.dates;
@@ -538,8 +565,31 @@
   // ---- sound gate: muted until the chosen video itself is playing ----
   // During a pre-roll ad the video's own clock sits at 0, so sound comes on once it moves and the length is the one we expect.
   const secs = (len) => len.split(":").reduce((t, n) => t * 60 + +n, 0);
-  function hush() { if (!ready) return; player.mute(); hushed = true; $("player").classList.add("hushed"); }
-  function unhush() { if (!hushed) return; hushed = false; $("player").classList.remove("hushed"); if (ready) player.unMute(); }
+  function hush() { if (!ready) return; player.mute(); hushed = true; adSince = 0; $("player").classList.add("hushed"); $("player").classList.remove("ad", "skippy"); }
+  function unhush() {
+    if (!hushed) return; hushed = false; $("player").classList.remove("hushed", "ad", "skippy");
+    if (ready) { player.unMute(); applyCC(); }
+  }
+  // An ad is playing while sound is held back and the video's own clock hasn't moved.
+  function adCheck(now) {
+    const ad = hushed && now < 1;
+    if (!ad) adSince = 0; else if (!adSince) adSince = Date.now();
+    $("player").classList.toggle("ad", ad);
+    $("player").classList.toggle("skippy", ad && Date.now() - adSince >= 5000);
+    return ad;
+  }
+
+  // ---- captions: YouTube's own CC button sits under the bottom shield, so ours lives up top ----
+  function applyCC() {
+    if (!ready) return;
+    try {
+      if (cc) { player.loadModule("captions"); player.setOption("captions", "track", { languageCode: "en" }); }
+      else player.unloadModule("captions");
+    } catch {}
+  }
+  function paintCC() { $("cc-btn").classList.toggle("on", cc); $("cc-btn").setAttribute("aria-label", cc ? "Turn captions off" : "Turn captions on"); }
+  $("cc-btn").onclick = () => { cc = !cc; store.set("cc", cc); paintCC(); applyCC(); toast(cc ? "Captions on" : "Captions off"); };
+  paintCC();
 
   $("onward").onclick = () => { showCover(null); paint(true); };
   $("resume").onclick = () => { showCover(null); if (ready) player.playVideo(); };
@@ -631,10 +681,11 @@
         `<a href="https://www.youtube.com/watch?v=${v[0]}" target="_blank" rel="noopener">${esc(v[1])}</a> · ${esc(v[2])} · ${v[3]}` +
         `<br><span class="fine">${t.n} watched today of ${perDay + t.extra} allowed · ${punched.size} of ${S.length} tickets</span>` +
         (NOTES[s.f] ? `<div class="note">${NOTES[s.f]}</div>` : "");
-      const k = pick[s.p] && s[pick[s.p]] ? pick[s.p] : "a";
+      const k = pickKey(s);
       document.querySelectorAll("#g-pick button").forEach(b => { b.classList.toggle("on", b.dataset.k === k); b.disabled = !s[b.dataset.k]; });
       $("g-pick-note").textContent = s.d ? `Deeper: ${s.d[1]} (${s.d[2]}, ${s.d[3]}). Grown-up level, often worth a try.` : "No deeper video for this stop.";
     } else $("g-now").innerHTML = "<b>End of the line.</b> Every stop is done.";
+    paintMode();
     $("g-big").textContent = big ? "Keep videos small" : "Make videos big";
     document.querySelectorAll("#g-perday button").forEach(b => b.classList.toggle("on", +b.dataset.n === perDay));
     setUnit(goUnit);
@@ -650,7 +701,19 @@
     setPick(s, b.dataset.k);
     closeSheets(); paint(true); toast({ a: "Main video", b: "Backup video", d: "Deeper video" }[b.dataset.k]);
   });
-  $("g-big").onclick = () => { big = !big; store.set("big", big); closeSheets(); toast(big ? "Videos fill the screen" : "Videos stay small"); };
+  const DEEP = S.filter(x => x.d).length;
+  function paintMode() {
+    document.querySelectorAll("#g-mode button").forEach(b => b.classList.toggle("on", b.dataset.m === mode));
+    $("g-mode-note").textContent = mode === "adult"
+      ? `Grown-up plays the Deeper video on the ${DEEP} stops that have one, and the kid video everywhere else.`
+      : "Kid plays videos made for kids. Grown-up swaps in the Deeper video where there is one.";
+  }
+  document.querySelectorAll("#g-mode button").forEach(b => b.onclick = () => {
+    if (b.dataset.m === mode) return;
+    mode = b.dataset.m; store.set("mode", mode);
+    closeSheets(); paint(true); toast(mode === "adult" ? "Grown-up videos" : "Kid videos");
+  });
+  $("g-big").onclick =() => { big = !big; store.set("big", big); closeSheets(); toast(big ? "Videos fill the screen" : "Videos stay small"); };
   $("g-skip").onclick = () => moveTo(pos + 1, "Skipped ahead one stop");
   $("g-back").onclick = () => moveTo(pos - 1, "Went back one stop");
   $("g-more").onclick = () => { const t = today(); t.extra++; store.set("today", t); closeSheets(); paint(true); toast("One more stop unlocked for today"); };
@@ -689,7 +752,7 @@
     player = new YT.Player("yt", {
       videoId: s ? vid(s)[0] : undefined,
       // Plays inside the app (no full screen) so the covers and shields stay on top of YouTube's player.
-      playerVars: { playsinline: 1, rel: 0, fs: 0, modestbranding: 1, iv_load_policy: 3, disablekb: 1 },
+      playerVars: { playsinline: 1, rel: 0, fs: 0, modestbranding: 1, iv_load_policy: 3, disablekb: 1, cc_load_policy: cc ? 1 : 0, cc_lang_pref: "en" },
       events: {
         onReady: () => { ready = true; hush(); },
         onStateChange: (e) => {
@@ -708,16 +771,16 @@
             if (now / dur >= 0.9) reached = true;
             const want = stop() ? secs(vid(stop())[3]) : dur;
             if (hushed && now >= 1 && (Math.abs(dur - want) <= Math.max(4, want * 0.06) || now >= 15)) unhush();
-            p.classList.toggle("endzone", dur - now <= 22);
+            // During an ad, dur is the ad's length, so a short ad must not shield the whole player (and its Skip button).
+            p.classList.toggle("endzone", !adCheck(now) && dur - now <= 22);
           }, 1000);
         },
         // 100 = removed, 101/150 = embedding turned off: try the backup, then the deeper video, then skip.
         onError: (e) => {
           const s = stop(); if (!s || ![100, 101, 150].includes(e.data)) return;
-          const order = ["a", "b", "d"], at = order.indexOf(pick[s.p] && s[pick[s.p]] ? pick[s.p] : "a");
-          const next = order.slice(at + 1).find(k => s[k]);
+          const order = ORDER[mode], next = order.slice(order.indexOf(pickKey(s)) + 1).find(k => s[k]);
           if (next) { setPick(s, next); paint(); }
-          else { setPick(s, "a"); moveTo(pos + 1, "That video's gone. Skipping ahead."); }
+          else { setPick(s, order[0]); moveTo(pos + 1, "That video's gone. Skipping ahead."); }
         },
       },
     });
