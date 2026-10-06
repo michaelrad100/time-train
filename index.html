@@ -236,10 +236,14 @@
 
   /* credit line and About sheet */
   .credit { text-align: center; font-size: 14px; color: var(--muted); padding: 2px 8px 6px; }
-  .credit button { color: var(--muted); font-weight: 700; }
-  .credit button i, .about i { font-style: italic; }
-  .credit button b { font-weight: inherit; white-space: nowrap; }
-  .credit button span { text-decoration: underline; text-underline-offset: 3px; }
+  .credit p { margin: 0 0 10px; font-weight: 700; }
+  .credit i, .about i { font-style: italic; }
+  .credit-btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+  .credit-btns button { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; background: var(--card);
+    border: 2px solid var(--rule); color: var(--ink); font-weight: 800; font-size: 15px; }
+  .credit-btns button:active { background: var(--rule); }
+  .credit-btns svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--muted); }
+  #save-btn.saved svg { color: var(--line); fill: currentColor; }
   .about { max-width: 620px; font-weight: 400; font-size: 16px; line-height: 1.55; }
   .about p { margin: 0 0 14px; }
   .about .lede { font-size: 18px; font-weight: 600; line-height: 1.45; }
@@ -290,7 +294,6 @@
   .intro .go-wrap .fine { text-align: center; max-width: 40ch; }
   .about .again { margin: 0 0 14px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; display: block; }
   /* optional email sign-in */
-  .credit .save-link { display: inline-block; margin-top: 4px; font-weight: 800; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
   .link-btn { font-weight: 800; font-size: 15px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
   .save-form { display: grid; gap: 12px; margin: 0 0 12px; justify-items: start; }
   .save-form input { width: 100%; font: inherit; font-size: 18px; font-weight: 700; padding: 12px 14px; border-radius: 14px; border: 2px solid var(--rule); background: var(--card); color: var(--ink); }
@@ -365,12 +368,18 @@
     <div class="all-cap"><span>Big Bang</span><span id="punched"></span><span>Today</span></div>
   </button>
 
-  <footer class="credit"><button id="about-btn">A companion to DK's <i>Timelines of Everything</i> <b>· <span>About</span></b></button><br><button class="save-link" id="save-btn">Save your spot</button></footer>
+  <footer class="credit">
+    <p>A companion to DK's <i>Timelines of Everything</i></p>
+    <div class="credit-btns">
+      <button id="about-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.1"/></svg>About</button>
+      <button id="save-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M6.5 3.5h11v17L12 16.2l-5.5 4.3z"/></svg><span id="save-label">Save your spot</span></button>
+    </div>
+  </footer>
 
   <div class="sheet-bg" id="about-sheet"><div class="sheet">
     <div class="sheet-head"><h3>About Time Train</h3><button class="close" data-close>Done</button></div>
     <div class="about">
-      <p class="lede">Time Train is a companion to <i>Timelines of Everything</i>, a big, beautiful book from DK that walks through history from the Big Bang to today, one two-page spread at a time.</p>
+      <p class="lede">Time Train is a companion to <a class="by" href="https://www.penguinrandomhouse.com/books/764668/timelines-of-everything-by-dk/" target="_blank" rel="noopener"><i>Timelines of Everything</i></a>, a big, beautiful book from DK that walks through history from the Big Bang to today, one two-page spread at a time.</p>
       <p>I made this for my daughter. As we read the timelines together, we kept having questions and wanting to learn more, so I decided to create this companion. It pairs each timeline in the book with a short video that dives a little deeper into the topic.</p>
       <p>We recommend reading the timeline in the book first, then watching the video that goes with it.</p>
       <p>A few things I did to make it kid-friendly:</p>
@@ -466,7 +475,7 @@
       <div class="first" id="intro-first"></div>
       <div class="go-wrap">
         <button class="big-btn" id="intro-go">All aboard! <svg viewBox="0 0 24 24"><path d="M6 3.8v16.4L20 12z"/></svg></button>
-        <button class="link-btn" id="intro-save">Riding on another device? Pick up where you left off</button>
+        <button class="link-btn" id="intro-save">Pick up where you left off</button>
         <p class="fine">Grown-ups: press and hold the lock button for settings, like how many videos a day.</p>
       </div>
     </div>
@@ -903,7 +912,8 @@
     } catch (e) { if (e.status === 401) signOut(); }
   }
   function paintSave() {
-    $("save-btn").textContent = account ? `Spot saved to ${account.hint}` : "Save your spot";
+    $("save-label").textContent = account ? "Spot saved" : "Save your spot";
+    $("save-btn").classList.toggle("saved", !!account);
     $("save-out").hidden = !!account; $("save-in").hidden = !account;
     $("save-hint").textContent = account ? account.hint : "";
   }
@@ -935,6 +945,20 @@
   document.addEventListener("visibilitychange", () => { if (!document.hidden) syncNow(true); });
   paintSave();
   syncNow(true);
+
+  // ---- quiet auto-update: a home-screen app resumes instead of reloading, so check for a new version on the way back in ----
+  // Progress lives on the device, so a reload loses nothing. It waits while a video or any sheet is open and tries again next time.
+  const version = async () => {
+    const r = await fetch(location.pathname, { method: "HEAD", cache: "no-store" });
+    return r.ok ? r.headers.get("ETag") || r.headers.get("Last-Modified") : null;
+  };
+  let loadedVersion = null;
+  version().then(v => { loadedVersion = v; }).catch(() => {});
+  document.addEventListener("visibilitychange", async () => {
+    if (document.hidden || !loadedVersion) return;
+    const v = await version().catch(() => null);
+    if (v && v !== loadedVersion && !document.hidden && !busy() && !document.querySelector(".sheet-bg.show")) location.reload();
+  });
 
   // ---- YouTube player ----
   window.onYouTubeIframeAPIReady = () => {
