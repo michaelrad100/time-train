@@ -49,16 +49,18 @@
     max-width: 760px; margin: 0 auto;
     -webkit-font-smoothing: antialiased; -webkit-user-select: none; user-select: none;
   }
+  /* the six line colors, as in the app icon: wide, faint bands that dip through the middle of the screen and back up */
+  body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .15; filter: saturate(.75);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M-100 -250C500 417 1100 417 1700 -250L1700 -80C1100 587 500 587 -100 -80Z' fill='%232fb36b'/%3E%3Cpath d='M-100 -80C500 587 1100 587 1700 -80L1700 90C1100 757 500 757 -100 90Z' fill='%23f0960e'/%3E%3Cpath d='M-100 90C500 757 1100 757 1700 90L1700 260C1100 927 500 927 -100 260Z' fill='%238b5cf6'/%3E%3Cpath d='M-100 260C500 927 1100 927 1700 260L1700 430C1100 1097 500 1097 -100 430Z' fill='%231e9be8'/%3E%3Cpath d='M-100 430C500 1097 1100 1097 1700 430L1700 600C1100 1267 500 1267 -100 600Z' fill='%23ef4444'/%3E%3Cpath d='M-100 600C500 1267 1100 1267 1700 600L1700 770C1100 1437 500 1437 -100 770Z' fill='%23ec4899'/%3E%3C/svg%3E") center / cover no-repeat; }
   button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
   button:focus-visible, input:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 
   /* top bar */
   .top { display: flex; align-items: center; gap: 10px; padding-top: 6px; }
   .brand { display: flex; align-items: center; gap: 9px; margin-right: auto; }
-  .brand img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 3px 8px rgba(29,37,80,.25); }
   .brand b { font-family: var(--sign); font-weight: 400; font-size: 25px; letter-spacing: .02em; line-height: 1; }
   .brand b span { color: var(--line); transition: color .4s; }
-  .icon-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 2px solid var(--rule);
+  .icon-btn { flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 2px solid var(--rule);
     display: grid; place-items: center; color: var(--ink); position: relative; }
   .icon-btn svg { width: 22px; height: 22px; }
   .icon-btn:active { transform: scale(.95); }
@@ -236,14 +238,10 @@
 
   /* credit line and About sheet */
   .credit { text-align: center; font-size: 14px; color: var(--muted); padding: 2px 8px 6px; }
-  .credit p { margin: 0 0 10px; font-weight: 700; }
+  .credit p { margin: 0 0 2px; font-weight: 700; }
   .credit i, .about i { font-style: italic; }
-  .credit-btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
-  .credit-btns button { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; background: var(--card);
-    border: 2px solid var(--rule); color: var(--ink); font-weight: 800; font-size: 15px; }
-  .credit-btns button:active { background: var(--rule); }
-  .credit-btns svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--muted); }
-  #save-btn.saved svg { color: var(--line); fill: currentColor; }
+  .credit button { color: var(--muted); font-weight: 700; padding: 4px 10px; text-decoration: underline; text-underline-offset: 3px; }
+  #save-btn.saved svg { color: var(--line); fill: currentColor; transition: color .4s; }
   .about { max-width: 620px; font-weight: 400; font-size: 16px; line-height: 1.55; }
   .about p { margin: 0 0 14px; }
   .about .lede { font-size: 18px; font-weight: 600; line-height: 1.45; }
@@ -306,9 +304,12 @@
 </head>
 <body>
   <div class="top">
-    <div class="brand"><img src="icon.png" alt=""><b>Time <span>Train</span></b></div>
+    <div class="brand"><b>Time <span>Train</span></b></div>
     <button class="icon-btn" id="map-btn" aria-label="Route map">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M7.2 6H14a3.5 3.5 0 0 1 0 7H10a3.5 3.5 0 0 0 0 7h6.8"/></svg>
+    </button>
+    <button class="icon-btn" id="save-btn" aria-label="Save your spot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M6.5 3.5h11v17L12 16.2l-5.5 4.3z"/></svg>
     </button>
     <button class="icon-btn" id="grown-btn" aria-label="Grown-ups: press and hold">
       <span class="hold" id="hold"></span>
@@ -370,10 +371,7 @@
 
   <footer class="credit">
     <p>A companion to DK's <i>Timelines of Everything</i></p>
-    <div class="credit-btns">
-      <button id="about-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.1"/></svg>About</button>
-      <button id="save-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M6.5 3.5h11v17L12 16.2l-5.5 4.3z"/></svg><span id="save-label">Save your spot</span></button>
-    </div>
+    <button id="about-btn">About</button>
   </footer>
 
   <div class="sheet-bg" id="about-sheet"><div class="sheet">
@@ -458,7 +456,7 @@
   <div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
     <button class="x" id="intro-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="intro-in">
-      <div class="brand"><img src="icon.png" alt=""><b>Time <span>Train</span></b></div>
+      <div class="brand"><b>Time <span>Train</span></b></div>
       <section class="board">
         <span class="label">Welcome aboard</span>
         <div class="stop" id="intro-title">From the Big Bang to today</div>
@@ -912,7 +910,7 @@
     } catch (e) { if (e.status === 401) signOut(); }
   }
   function paintSave() {
-    $("save-label").textContent = account ? "Spot saved" : "Save your spot";
+    $("save-btn").setAttribute("aria-label", account ? "Spot saved" : "Save your spot");
     $("save-btn").classList.toggle("saved", !!account);
     $("save-out").hidden = !!account; $("save-in").hidden = !account;
     $("save-hint").textContent = account ? account.hint : "";
