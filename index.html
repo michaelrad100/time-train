@@ -10,19 +10,20 @@
 <meta property="og:site_name" content="Time Train">
 <meta property="og:title" content="Time Train: a kids' companion to DK's Timelines of Everything">
 <meta property="og:description" content="One short video for every spread of the book, from the Big Bang to today. Made by a dad for his daughter, to go a little deeper on whatever she's reading.">
-<meta property="og:url" content="https://michaelrad100.github.io/time-train/">
-<meta property="og:image" content="https://michaelrad100.github.io/time-train/share.png">
+<meta property="og:url" content="https://michaelrad.me/time-train/">
+<meta property="og:image" content="https://michaelrad.me/time-train/share.png?v=4">
 <meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Time Train: one short video for every spread of DK's Timelines of Everything, from the Big Bang to today.">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image:height" content="1200">
+<meta property="og:image:alt" content="The words Time Train above six colored timeline lines sweeping across a navy background.">
+<meta name="twitter:card" content="summary">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Time Train">
 <meta name="theme-color" content="#f4f6fb">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=2">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,16 +50,18 @@
     max-width: 760px; margin: 0 auto;
     -webkit-font-smoothing: antialiased; -webkit-user-select: none; user-select: none;
   }
+  /* the six line colors, as in the app icon: wide, faint bands that dip through the middle of the screen and back up */
+  body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .15; filter: saturate(.75);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M-100 -250C500 417 1100 417 1700 -250L1700 -80C1100 587 500 587 -100 -80Z' fill='%232fb36b'/%3E%3Cpath d='M-100 -80C500 587 1100 587 1700 -80L1700 90C1100 757 500 757 -100 90Z' fill='%23f0960e'/%3E%3Cpath d='M-100 90C500 757 1100 757 1700 90L1700 260C1100 927 500 927 -100 260Z' fill='%238b5cf6'/%3E%3Cpath d='M-100 260C500 927 1100 927 1700 260L1700 430C1100 1097 500 1097 -100 430Z' fill='%23ef4444'/%3E%3Cpath d='M-100 430C500 1097 1100 1097 1700 430L1700 600C1100 1267 500 1267 -100 600Z' fill='%231e9be8'/%3E%3Cpath d='M-100 600C500 1267 1100 1267 1700 600L1700 770C1100 1437 500 1437 -100 770Z' fill='%23ec4899'/%3E%3C/svg%3E") center / cover no-repeat; }
   button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
   button:focus-visible, input:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 
   /* top bar */
   .top { display: flex; align-items: center; gap: 10px; padding-top: 6px; }
   .brand { display: flex; align-items: center; gap: 9px; margin-right: auto; }
-  .brand img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 3px 8px rgba(29,37,80,.25); }
   .brand b { font-family: var(--sign); font-weight: 400; font-size: 25px; letter-spacing: .02em; line-height: 1; }
   .brand b span { color: var(--line); transition: color .4s; }
-  .icon-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 2px solid var(--rule);
+  .icon-btn { flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 2px solid var(--rule);
     display: grid; place-items: center; color: var(--ink); position: relative; }
   .icon-btn svg { width: 22px; height: 22px; }
   .icon-btn:active { transform: scale(.95); }
@@ -69,7 +72,6 @@
   /* departure board */
   .board { background: var(--board); color: #fff; border-radius: 22px; padding: 16px 18px 18px; position: relative; overflow: hidden;
     box-shadow: 0 10px 24px -12px rgba(29,37,80,.6); }
-  .board::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: var(--line); transition: background .4s; }
   .board .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .board .label { font-family: var(--sign); color: var(--amber); font-size: 14px; letter-spacing: .06em; }
   .board .page { font-size: 14px; color: #c6cbe6; white-space: nowrap; margin-left: auto; }
@@ -81,9 +83,9 @@
   .board .when { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin: -4px 0 12px; font-size: 17px; font-weight: 800; }
   .board .when svg { width: 20px; height: 20px; color: var(--amber); flex-shrink: 0; }
   .board .when span { color: var(--amber); font-weight: 700; }
-  .line-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--line); color: #fff; padding: 5px 12px 5px 8px;
+  .line-chip { display: inline-flex; align-items: center; gap: 8px; background: color-mix(in srgb, var(--line) 22%, transparent); color: #fff; padding: 5px 12px 5px 8px;
     border-radius: 999px; font-weight: 900; font-size: 14px; transition: background .4s; }
-  .line-chip i { width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 4px var(--line); }
+  .line-chip i { width: 10px; height: 10px; margin-left: 2px; border-radius: 50%; background: var(--line); }
   .line-chip small { font-weight: 700; opacity: .85; }
 
   .heads-up { display: none; align-items: center; gap: 12px; background: #fff4d6; border: 2px solid #f5c95b; color: #6a4a00;
@@ -93,7 +95,7 @@
 
   /* player */
   .player { position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 20px; overflow: hidden; background: #0e1330;
-    box-shadow: 0 0 0 4px var(--card), 0 0 0 7px var(--line), 0 16px 34px -14px rgba(29,37,80,.55); transition: box-shadow .4s; }
+    box-shadow: 0 16px 34px -14px rgba(29,37,80,.55); }
   .player iframe, #yt { position: absolute; inset: 0; width: 100%; height: 100%; }
   /* the ticket and "see you tomorrow" screens need more room than a 16:9 frame has on a phone */
   .player.tall { aspect-ratio: auto; min-height: max(330px, 56.25vw); }
@@ -167,12 +169,12 @@
   @keyframes thunk { from { transform: rotate(-12deg) scale(2.4); opacity: 0; } }
 
   /* "Did you know?" facts for the current stop */
-  .facts { background: var(--card); border: 2px solid var(--rule); border-left: 8px solid var(--line); border-radius: 20px; padding: 14px 18px 12px; transition: border-color .4s; }
+  .facts { background: var(--card); border: 2px solid var(--rule); border-radius: 20px; padding: 14px 18px 12px; }
   .facts h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; font-family: var(--sign); font-weight: 400; font-size: 16px; letter-spacing: .03em; }
   .facts h3 svg { width: 22px; height: 22px; color: #e0a106; }
   .facts ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
   .facts li { position: relative; padding-left: 20px; font-size: 16px; line-height: 1.4; }
-  .facts li::before { content: ""; position: absolute; left: 2px; top: .5em; width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .facts li::before { content: ""; position: absolute; left: 3px; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--line); opacity: .7; }
 
   /* route strip for the current line */
   .route { background: var(--card); border: 2px solid var(--rule); border-radius: 20px; padding: 14px 16px 12px; text-align: left; width: 100%; }
@@ -237,10 +239,10 @@
 
   /* credit line and About sheet */
   .credit { text-align: center; font-size: 14px; color: var(--muted); padding: 2px 8px 6px; }
-  .credit button { color: var(--muted); font-weight: 700; }
-  .credit button i, .about i { font-style: italic; }
-  .credit button b { font-weight: inherit; white-space: nowrap; }
-  .credit button span { text-decoration: underline; text-underline-offset: 3px; }
+  .credit p { margin: 0 0 2px; font-weight: 700; }
+  .credit i, .about i { font-style: italic; }
+  .credit button { color: var(--muted); font-weight: 700; padding: 4px 10px; text-decoration: underline; text-underline-offset: 3px; }
+  #save-btn.saved svg { color: var(--line); fill: currentColor; transition: color .4s; }
   .about { max-width: 620px; font-weight: 400; font-size: 16px; line-height: 1.55; }
   .about p { margin: 0 0 14px; }
   .about .lede { font-size: 18px; font-weight: 600; line-height: 1.45; }
@@ -258,14 +260,57 @@
     opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; white-space: nowrap; }
   .toast.show { opacity: .96; transform: translate(-50%, 0); }
   .confetti { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 25; pointer-events: none; }
+  /* first-visit intro: what Time Train is, how a stop works, and the six lines ahead */
+  .intro { position: fixed; inset: 0; z-index: 40; overflow: auto; background: var(--paper);
+    background-image: radial-gradient(circle, rgba(29,37,80,.07) 1.2px, transparent 1.4px); background-size: 22px 22px;
+    padding: calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 24px); animation: fade .3s ease; }
+  .intro-in { max-width: 560px; margin: 0 auto; display: grid; gap: 16px; }
+  .intro .x { position: absolute; right: max(12px, env(safe-area-inset-right)); top: calc(env(safe-area-inset-top) + 10px); width: 44px; height: 44px;
+    border-radius: 14px; display: grid; place-items: center; color: var(--muted); }
+  .intro .x svg { width: 22px; height: 22px; }
+  .intro .brand { margin: 0; }
+  .intro .board .stop { margin: 8px 0 6px; }
+  .intro .board p { margin: 0 0 14px; color: #c6cbe6; font-size: 16px; line-height: 1.4; }
+  .intro h3 { margin: 4px 0 0; font-family: var(--sign); font-weight: 400; font-size: 17px; letter-spacing: .03em; }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .steps li { display: flex; gap: 14px; align-items: flex-start; background: var(--card); border: 2px solid var(--rule); border-radius: 18px; padding: 12px 14px; }
+  .steps li > b { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--sign); font-weight: 400; font-size: 16px;
+    background: var(--amber); box-shadow: 0 3px 0 #d69d12; }
+  .steps li div { font-size: 15px; color: var(--muted); line-height: 1.35; }
+  .steps li div strong { display: block; color: var(--ink); font-size: 17px; font-weight: 900; margin-bottom: 2px; }
+  .lines { list-style: none; margin: 0; padding: 4px 0 0 4px; position: relative; }
+  .lines li { position: relative; display: flex; align-items: center; gap: 12px; padding: 6px 0; font-size: 15px; }
+  .lines li::before { content: ""; position: absolute; left: 8px; top: 0; bottom: 0; width: 6px; background: var(--c); }
+  .lines li:first-child::before { top: 50%; border-radius: 3px 3px 0 0; }
+  .lines li:last-child::before { bottom: 50%; border-radius: 0 0 3px 3px; }
+  .lines li i { position: relative; flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 4px var(--c); }
+  .lines li b { font-weight: 900; }
+  .lines li small { margin-left: auto; color: var(--muted); font-size: 13px; font-weight: 800; text-align: right; white-space: nowrap; }
+  .first { background: var(--card); border: 2px solid var(--rule); border-radius: 18px; padding: 12px 16px; font-size: 15px; color: var(--muted); }
+  .first strong { display: block; color: var(--ink); font-size: 17px; font-weight: 900; margin: 2px 0 4px; }
+  .first p { margin: 6px 0 0; }
+  .intro .go-wrap { display: grid; justify-items: center; gap: 10px; padding-top: 4px; }
+  .intro .go-wrap .fine { text-align: center; max-width: 40ch; }
+  .about .again { margin: 0 0 14px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; display: block; }
+  /* optional email sign-in */
+  .link-btn { font-weight: 800; font-size: 15px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .save-form { display: grid; gap: 12px; margin: 0 0 12px; justify-items: start; }
+  .save-form input { width: 100%; font: inherit; font-size: 18px; font-weight: 700; padding: 12px 14px; border-radius: 14px; border: 2px solid var(--rule); background: var(--card); color: var(--ink); }
+  .save-form input:focus { outline: 3px solid var(--amber); outline-offset: 1px; }
+  .save-form .big-btn:disabled { opacity: .6; }
+  .save-err { margin: 0 0 12px; color: #b42318; font-weight: 800; }
+  .about .foot .fine + .fine { margin-top: 8px; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
   <div class="top">
-    <div class="brand"><img src="icon.png" alt=""><b>Time <span>Train</span></b></div>
+    <div class="brand"><b>Time <span>Train</span></b></div>
     <button class="icon-btn" id="map-btn" aria-label="Route map">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M7.2 6H14a3.5 3.5 0 0 1 0 7H10a3.5 3.5 0 0 0 0 7h6.8"/></svg>
+    </button>
+    <button class="icon-btn" id="save-btn" aria-label="Save your spot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M6.5 3.5h11v17L12 16.2l-5.5 4.3z"/></svg>
     </button>
     <button class="icon-btn" id="grown-btn" aria-label="Grown-ups: press and hold">
       <span class="hold" id="hold"></span>
@@ -325,12 +370,15 @@
     <div class="all-cap"><span>Big Bang</span><span id="punched"></span><span>Today</span></div>
   </button>
 
-  <footer class="credit"><button id="about-btn">A companion to DK's <i>Timelines of Everything</i> <b>· <span>About</span></b></button></footer>
+  <footer class="credit">
+    <p>A companion to DK's <i>Timelines of Everything</i></p>
+    <button id="about-btn">About</button>
+  </footer>
 
   <div class="sheet-bg" id="about-sheet"><div class="sheet">
     <div class="sheet-head"><h3>About Time Train</h3><button class="close" data-close>Done</button></div>
     <div class="about">
-      <p class="lede">Time Train is a companion to <i>Timelines of Everything</i>, a big, beautiful book from DK that walks through history from the Big Bang to today, one two-page spread at a time.</p>
+      <p class="lede">Time Train is a companion to <a class="by" href="https://www.penguinrandomhouse.com/books/764668/timelines-of-everything-by-dk/" target="_blank" rel="noopener"><i>Timelines of Everything</i></a>, a big, beautiful book from DK that walks through history from the Big Bang to today, one two-page spread at a time.</p>
       <p>I made this for my daughter. As we read the timelines together, we kept having questions and wanting to learn more, so I decided to create this companion. It pairs each timeline in the book with a short video that dives a little deeper into the topic.</p>
       <p>We recommend reading the timeline in the book first, then watching the video that goes with it.</p>
       <p>A few things I did to make it kid-friendly:</p>
@@ -340,10 +388,34 @@
         <li>Videos stay muted until any ads finish and the real video starts playing.</li>
         <li>It's one video a day by default, and the grown-up settings sit behind a press-and-hold lock.</li>
         <li>Stops about harder parts of history are flagged, so a grown-up can watch along.</li>
+        <li>Saving your spot is optional and only needs an email, which is never stored. It's turned into a scrambled code before anything is saved.</li>
       </ul>
+      <button class="again" id="intro-again">See how the ride works</button>
       <div class="foot">
         <a class="book-link" href="https://www.penguinrandomhouse.com/books/764668/timelines-of-everything-by-dk/" target="_blank" rel="noopener">Find the book</a>
         <p class="fine">Created by <a class="by" href="https://michaelrad.me" target="_blank" rel="noopener">Michael Rad</a>. Page numbers follow the 2023 edition. Time Train is a personal project and isn't affiliated with or endorsed by DK. The videos belong to their creators on YouTube.</p>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="sheet-bg" id="save-sheet"><div class="sheet">
+    <div class="sheet-head"><h3>Save your spot</h3><button class="close" data-close>Done</button></div>
+    <div class="about">
+      <div id="save-out">
+        <p class="lede">Type an email to save your tickets and your spot. Use the same email on any device or browser to pick up right where you left off.</p>
+        <form class="save-form" id="save-form" novalidate>
+          <input id="save-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Email address" aria-label="Email address">
+          <button class="big-btn" id="save-go" type="submit">Save my spot</button>
+        </form>
+        <p class="save-err" id="save-err" hidden></p>
+      </div>
+      <div id="save-in" hidden>
+        <p class="lede">Your spot is saved to <b id="save-hint"></b>. Tickets and your stop save as you go, and the same email on another device picks up right here.</p>
+        <p><button class="link-btn" id="save-signout">Sign out on this device</button></p>
+      </div>
+      <div class="foot">
+        <p class="fine">Saving your spot is optional. Without it, Time Train works the same and keeps progress on this device only.</p>
+        <p class="fine">There's no password, so anyone who types the same email sees the same tickets and spot. Think of it as a bookmark rather than a lock. Your email is never stored: it's turned into a scrambled code that can't be turned back into the address, and only that code and your progress (tickets, current stop and grown-up settings) are saved.</p>
       </div>
     </div>
   </div></div>
@@ -382,6 +454,32 @@
     </div>
   </div></div>
 
+  <div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
+    <button class="x" id="intro-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="intro-in">
+      <div class="brand"><b>Time <span>Train</span></b></div>
+      <section class="board">
+        <span class="label">Welcome aboard</span>
+        <div class="stop" id="intro-title">From the Big Bang to today</div>
+        <p id="intro-lede"></p>
+      </section>
+      <h3>How the ride works</h3>
+      <ol class="steps">
+        <li><b>1</b><div><strong>Read a timeline in the book</strong>Every stop matches a two-page spread, and the board at the top tells you which page.</div></li>
+        <li><b>2</b><div><strong>Watch the video</strong>A short video that goes a little deeper, plus a few "Did you know?" facts.</div></li>
+        <li><b>3</b><div><strong>Get your ticket punched</strong>Finish the video to earn a ticket. Then the train leaves for the next stop tomorrow.</div></li>
+      </ol>
+      <h3>Six lines to ride</h3>
+      <ol class="lines" id="intro-lines"></ol>
+      <div class="first" id="intro-first"></div>
+      <div class="go-wrap">
+        <button class="big-btn" id="intro-go">All aboard! <svg viewBox="0 0 24 24"><path d="M6 3.8v16.4L20 12z"/></svg></button>
+        <button class="link-btn" id="intro-save">Pick up where you left off</button>
+        <p class="fine">Grown-ups: press and hold the lock button for settings, like how many videos a day.</p>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <!-- Bump ?v= when these change so iPads pick up the new lists instead of a cached copy. -->
@@ -392,8 +490,8 @@
     "Prehistory":        { name: "Prehistory Line",  dates: "Before 3000 BCE",   color: "#2fb36b" },
     "Ancient World":     { name: "Ancient Line",     dates: "3000 BCE – 500 CE", color: "#f0960e" },
     "Medieval World":    { name: "Medieval Line",    dates: "500 – 1450",        color: "#8b5cf6" },
-    "Age of Encounters": { name: "Encounters Line",  dates: "1450 – 1750",       color: "#1e9be8" },
-    "Age of Revolution": { name: "Revolution Line",  dates: "1750 – 1914",       color: "#ef4444" },
+    "Age of Encounters": { name: "Encounters Line",  dates: "1450 – 1750",       color: "#ef4444" },
+    "Age of Revolution": { name: "Revolution Line",  dates: "1750 – 1914",       color: "#1e9be8" },
     "Modern World":      { name: "Modern Line",      dates: "After 1914",        color: "#ec4899" },
   };
   const ERA_ORDER = Object.keys(ERAS);
@@ -403,8 +501,12 @@
   // ---- storage (keys prefixed tt- so they never collide with another app on the same site) ----
   const store = {
     get(k, d) { try { return JSON.parse(localStorage.getItem("tt-" + k)) ?? d; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem("tt-" + k, JSON.stringify(v)); } catch {} },
+    set(k, v) { try { localStorage.setItem("tt-" + k, JSON.stringify(v)); } catch {} if (k in SYNCED && !quiet) changed(k); },
   };
+  // Progress that follows a signed-in rider to other devices, and the timestamp each one bumps (newest wins).
+  const SYNCED = { pos: "posAt", punched: null, today: null, perDay: "setAt", mode: "setAt", pick: "setAt", "pick-adult": "setAt" };
+  let quiet = false, account = store.get("account", null);   // account = { key, hint }; the email itself is never kept
+  function changed(k) { if (SYNCED[k]) store.set(SYNCED[k], Date.now()); queuePush(); }
   let pos = store.get("pos", 0);                        // index of the stop we're at
   const punched = new Set(store.get("punched", []));    // pages finished
   // Kid or grown-up: grown-ups get the deeper video (Nat Geo, Kurzgesagt...) where a stop has one, the kid video otherwise.
@@ -745,6 +847,117 @@
 
   setBig(false);
   paint();
+
+  // ---- first-visit intro: shown until it's dismissed once, and never to someone who already has tickets ----
+  function openIntro() {
+    $("intro-lede").textContent = `${S.length} stops through all of history, one for every timeline in DK's Timelines of Everything.`;
+    $("intro-lines").innerHTML = ERA_ORDER.map(era => {
+      const e = ERAS[era], n = S.filter(x => x.era === era).length;
+      return `<li style="--c:${e.color}"><i></i><span><b>${e.name}</b></span><small>${e.dates}<br>${n} stops</small></li>`;
+    }).join("");
+    const s = stop();
+    $("intro-first").innerHTML = s
+      ? `${pos ? "Your next stop" : "Your first stop"}<strong>${esc(s.topic)}</strong>Book page ${s.p} on the ${ERAS[s.era].name}` +
+        `<p>Already partway through the book? Tap the route map and ride to any stop.</p>`
+      : `<strong>You've reached the end of the line!</strong>Tap the route map to ride back to any stop.`;
+    closeSheets();
+    $("intro").hidden = false; document.body.classList.add("theater");
+    $("intro").scrollTop = 0; $("intro-go").focus({ preventScroll: true });
+  }
+  function closeIntro() { $("intro").hidden = true; document.body.classList.remove("theater"); store.set("intro", true); }
+  $("intro-go").onclick = closeIntro;
+  $("intro-x").onclick = closeIntro;
+  $("intro-again").onclick = openIntro;
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("intro").hidden) closeIntro(); });
+  if (!store.get("intro", false) && punched.size === 0) openIntro();
+
+  // ---- optional email sign-in: the same email on any device picks up the same tickets and spot ----
+  // The server turns the email into a key and stores only that; this device keeps the key and a masked hint.
+  const SYNC_URL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? "http://localhost:8791" : "https://time-train-sync-production.up.railway.app";
+  const record = () => ({
+    pos: { p: stop() ? stop().p : 0, at: store.get("posAt", 0) },
+    punched: [...punched], today: today(),
+    settings: { perDay, mode, pick: picks.kid, pickAdult: picks.adult, at: store.get("setAt", 0) },
+  });
+  async function call(route, body) {
+    const r = await fetch(SYNC_URL + route, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(j.error || "Couldn't reach Time Train. Try again in a moment."), { status: r.status });
+    return j;
+  }
+  // Take the combined record from the server into this device.
+  function apply(d) {
+    quiet = true;
+    const i = d.pos.p ? S.findIndex(x => x.p === d.pos.p) : S.length;
+    if (i >= 0 && d.pos.at >= store.get("posAt", 0)) { pos = i; store.set("pos", pos); store.set("posAt", d.pos.at); }
+    punched.clear(); d.punched.forEach(p => punched.add(p)); store.set("punched", [...punched]);
+    if (d.today.d) store.set("today", d.today);
+    const st = d.settings;
+    if (st.at > store.get("setAt", 0)) {
+      perDay = st.perDay; mode = st.mode; picks.kid = st.pick; picks.adult = st.pickAdult;
+      store.set("perDay", perDay); store.set("mode", mode); store.set("pick", picks.kid); store.set("pick-adult", picks.adult); store.set("setAt", st.at);
+    }
+    quiet = false;
+  }
+  // Never move the train out from under a video that's playing, paused or just finished.
+  const busy = () => $("player").classList.contains("playing") || ["paused", "done"].some(id => $(id).classList.contains("show"));
+  let pushTimer = 0;
+  function queuePush() { if (!account) return; clearTimeout(pushTimer); pushTimer = setTimeout(() => syncNow(false), 1500); }
+  async function syncNow(pull) {
+    if (!account) return;
+    try {
+      const { data } = await call("/sync", { key: account.key, data: record() });
+      if (pull && !busy()) { apply(data); paint(); }
+    } catch (e) { if (e.status === 401) signOut(); }
+  }
+  function paintSave() {
+    $("save-btn").setAttribute("aria-label", account ? "Spot saved" : "Save your spot");
+    $("save-btn").classList.toggle("saved", !!account);
+    $("save-out").hidden = !!account; $("save-in").hidden = !account;
+    $("save-hint").textContent = account ? account.hint : "";
+  }
+  function openSave() {
+    if (!$("intro").hidden) closeIntro();
+    closeSheets(); paintSave(); $("save-err").hidden = true;
+    $("save-sheet").classList.add("show");
+  }
+  function signOut() { account = null; store.set("account", null); paintSave(); }
+  const mask = (email) => { const [u, d] = email.trim().toLowerCase().split("@"); return `${u[0]}•••@${d}`; };
+  $("save-form").onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $("save-email").value.trim(), err = $("save-err");
+    err.hidden = true;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "That doesn't look like an email address."; err.hidden = false; return; }
+    $("save-go").disabled = true;
+    try {
+      const { key, known, data } = await call("/signin", { email, data: record() });
+      account = { key, hint: mask(email) }; store.set("account", account);
+      apply(data); $("save-email").value = "";
+      closeSheets(); paint(true); paintSave();
+      toast(known ? "Welcome back aboard!" : "Your spot is saved");
+    } catch (e2) { err.textContent = e2.message; err.hidden = false; }
+    finally { $("save-go").disabled = false; }
+  };
+  $("save-btn").onclick = openSave;
+  $("intro-save").onclick = openSave;
+  $("save-signout").onclick = () => { signOut(); closeSheets(); toast("Signed out on this device"); };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) syncNow(true); });
+  paintSave();
+  syncNow(true);
+
+  // ---- quiet auto-update: a home-screen app resumes instead of reloading, so check for a new version on the way back in ----
+  // Progress lives on the device, so a reload loses nothing. It waits while a video or any sheet is open and tries again next time.
+  const version = async () => {
+    const r = await fetch(location.pathname, { method: "HEAD", cache: "no-store" });
+    return r.ok ? r.headers.get("ETag") || r.headers.get("Last-Modified") : null;
+  };
+  let loadedVersion = null;
+  version().then(v => { loadedVersion = v; }).catch(() => {});
+  document.addEventListener("visibilitychange", async () => {
+    if (document.hidden || !loadedVersion) return;
+    const v = await version().catch(() => null);
+    if (v && v !== loadedVersion && !document.hidden && !busy() && !document.querySelector(".sheet-bg.show")) location.reload();
+  });
 
   // ---- YouTube player ----
   window.onYouTubeIframeAPIReady = () => {
