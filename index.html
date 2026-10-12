@@ -310,11 +310,7 @@
   .lines li i { position: relative; flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 4px var(--c); }
   .lines li b { font-weight: 900; }
   .lines li small { margin-left: auto; color: var(--muted); font-size: 13px; font-weight: 800; text-align: right; white-space: nowrap; }
-  .first { background: var(--card); border: 2px solid var(--rule); border-radius: 18px; padding: 12px 16px; font-size: 15px; color: var(--muted); }
-  .first strong { display: block; color: var(--ink); font-size: 17px; font-weight: 900; margin: 2px 0 4px; }
-  .first p { margin: 6px 0 0; }
   .intro .go-wrap { display: grid; justify-items: center; gap: 10px; padding-top: 4px; }
-  .intro .go-wrap .fine { text-align: center; max-width: 40ch; }
   .about .again { margin: 0 0 14px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; display: block; }
   /* optional email sign-in */
   .link-btn { font-weight: 800; font-size: 15px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
@@ -503,11 +499,8 @@
       </ol>
       <h3>Six lines to ride</h3>
       <ol class="lines" id="intro-lines"></ol>
-      <div class="first" id="intro-first"></div>
       <div class="go-wrap">
         <button class="big-btn" id="intro-go">All aboard! <svg viewBox="0 0 24 24"><path d="M6 3.8v16.4L20 12z"/></svg></button>
-        <button class="link-btn" id="intro-save">Pick up where you left off</button>
-        <p class="fine">Grown-ups: press and hold the lock button for settings, like how many videos a day.</p>
       </div>
     </div>
   </div>
@@ -924,11 +917,6 @@
       const e = ERAS[era], n = S.filter(x => x.era === era).length;
       return `<li style="--c:${e.color}"><i></i><span><b>${e.name}</b></span><small>${e.dates}<br>${n} stops</small></li>`;
     }).join("");
-    const s = stop();
-    $("intro-first").innerHTML = s
-      ? `${pos ? "Your next stop" : "Your first stop"}<strong>${esc(s.topic)}</strong>Book page ${s.p} on the ${ERAS[s.era].name}` +
-        `<p>Already partway through the book? Tap the route map and ride to any stop.</p>`
-      : `<strong>You've reached the end of the line!</strong>Tap the route map to ride back to any stop.`;
     closeSheets();
     $("intro").hidden = false; document.body.classList.add("theater");
     $("intro").scrollTop = 0; $("intro-go").focus({ preventScroll: true });
@@ -1008,7 +996,6 @@
     finally { $("save-go").disabled = false; }
   };
   $("save-btn").onclick = openSave;
-  $("intro-save").onclick = openSave;
   $("save-signout").onclick = () => { signOut(); closeSheets(); toast("Signed out on this device"); };
   document.addEventListener("visibilitychange", () => { if (!document.hidden) syncNow(true); });
   paintSave();
