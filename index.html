@@ -183,8 +183,17 @@
   .go-deeper b { display: block; font-weight: 900; font-size: 16px; }
   .go-deeper small { display: block; color: var(--muted); font-size: 14px; }
 
-  /* "Did you know?" facts for the current stop */
+  /* "Did you know?" facts for the current stop, under a line about who made the video and what it covers */
   .facts { background: var(--card); border: 2px solid var(--rule); border-radius: 20px; padding: 14px 18px 12px; }
+  .vid-about { margin: 0 0 12px; padding-bottom: 12px; border-bottom: 2px solid var(--rule); }
+  .vid-about p { margin: 0; }
+  .vid-about .by { display: flex; align-items: center; gap: 7px; font-size: 14px; color: var(--muted); font-weight: 700; }
+  .vid-about .by svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--line); }
+  .vid-about .by b { color: var(--ink); font-weight: 900; }
+  .vid-about .blurb { margin-top: 4px; font-size: 16px; line-height: 1.4; }
+  .vid-about:has(.blurb[hidden]) { padding-bottom: 10px; }
+  .facts li .seen { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 900; white-space: nowrap;
+    vertical-align: 1px; background: color-mix(in srgb, var(--line) 16%, transparent); }
   .facts h3 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; font-family: var(--sign); font-weight: 400; font-size: 16px; letter-spacing: .03em; }
   .facts h3 svg { width: 22px; height: 22px; color: #e0a106; }
   .facts ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
@@ -382,6 +391,10 @@
   </button>
 
   <section class="facts" id="facts" hidden>
+    <div class="vid-about" id="vid-about">
+      <p class="by"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3.8v16.4L20 12z"/></svg><span>Video by <b id="vid-by"></b></span></p>
+      <p class="blurb" id="vid-blurb"></p>
+    </div>
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>Did you know?</h3>
     <ul id="facts-list"></ul>
   </section>
@@ -505,6 +518,7 @@
 <script src="videos.js?v=7"></script>
 <script src="facts.js?v=4"></script>
 <script src="trims.js?v=1"></script>
+<script src="about.js?v=1"></script>
 <script>
   const ERAS = {
     "Prehistory":        { name: "Prehistory Line",  dates: "Before 3000 BCE",   color: "#2fb36b" },
@@ -575,9 +589,12 @@
     $("when").hidden = !w;
     $("when-label").textContent = w ? w[0] : "";
     $("when-ago").textContent = w && w[1] !== undefined ? agoText(w[0], w[1]) : "";
-    const facts = (window.FACTS || {})[s.p];
-    $("facts").hidden = !facts;
-    $("facts-list").innerHTML = (facts || []).map(f => `<li>${esc(f)}</li>`).join("");
+    // Who made the video that's queued up, what it's about, and which of the facts it covers (from about.js, written from each transcript).
+    const v = vid(s), ab = (window.ABOUT || {})[v[0]] || [], facts = (window.FACTS || {})[s.p] || [];
+    $("facts").hidden = false;
+    $("vid-by").textContent = v[2];
+    $("vid-blurb").textContent = ab[0] || ""; $("vid-blurb").hidden = !ab[0];
+    $("facts-list").innerHTML = facts.map((f, i) => `<li>${esc(f)}${(ab[1] || []).includes(i) ? ` <span class="seen">In the video</span>` : ""}</li>`).join("");
     return true;
   }
 
@@ -739,7 +756,7 @@
   $("cc-btn").onclick = () => { cc = !cc; store.set("cc", cc); paintCC(); applyCC(); toast(cc ? "Captions on" : "Captions off"); };
   paintCC();
 
-  $("onward").onclick = () => { showCover(null); paint(true); };
+  $("onward").onclick = () => { if (maybeUpdate()) return; showCover(null); paint(true); };
   // Tap anywhere on the video to pause it, and anywhere on the paused screen to keep going.
   $("glass").onclick = () => { if (ready) player.pauseVideo(); };
   $("paused").onclick = () => { showCover(null); if (ready) player.playVideo(); };
@@ -853,7 +870,8 @@
     setUnit(goUnit);
     $("grown-sheet").classList.add("show");
   }
-  const closeSheets = () => document.querySelectorAll(".sheet-bg").forEach(x => x.classList.remove("show"));
+  // Closing a sheet is a calm moment to pick up a waiting update (after this tap's own work, like moving to a new stop, is saved).
+  const closeSheets = () => { document.querySelectorAll(".sheet-bg").forEach(x => x.classList.remove("show")); setTimeout(maybeUpdate); };
   document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
   document.querySelectorAll(".sheet-bg").forEach(bg => bg.addEventListener("click", (e) => { if (e.target === bg) closeSheets(); }));
 
@@ -893,8 +911,9 @@
     moveTo(i, `Now at Day ${i + 1}: ${S[i].topic}`);
   };
 
-  // A new day unlocks the next stop if the app was left open overnight.
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && $("rest").classList.contains("show") && canWatch()) paint(); });
+  // A new day unlocks the next stop if the app was left open overnight, whether it was left on "see you tomorrow" or on the punched ticket.
+  const waiting = () => $("rest").classList.contains("show") || ($("done").classList.contains("show") && $("onward").hidden && !!stop());
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && waiting() && canWatch()) paint(); });
 
   setBig(false);
   paint();
@@ -996,17 +1015,27 @@
   syncNow(true);
 
   // ---- quiet auto-update: a home-screen app resumes instead of reloading, so check for a new version on the way back in ----
-  // Progress lives on the device, so a reload loses nothing. It waits while a video or any sheet is open and tries again next time.
+  // Progress lives on the device, so a reload loses nothing. Mid-video or with a sheet open, the new version waits for the next calm
+  // moment (All aboard, closing a sheet, or coming back to the app). After a long time away it loads anyway: a half-watched video
+  // from hours ago just starts again from its poster.
   const version = async () => {
     const r = await fetch(location.pathname, { method: "HEAD", cache: "no-store" });
     return r.ok ? r.headers.get("ETag") || r.headers.get("Last-Modified") : null;
   };
-  let loadedVersion = null;
+  let loadedVersion = null, updateReady = false, hiddenAt = 0;
   version().then(v => { loadedVersion = v; }).catch(() => {});
+  const calm = () => !$("player").classList.contains("playing") && !document.querySelector(".sheet-bg.show") && $("intro").hidden;
+  function maybeUpdate(force) {
+    if (!updateReady || document.hidden || !(force || calm())) return false;
+    location.reload(); return true;
+  }
   document.addEventListener("visibilitychange", async () => {
-    if (document.hidden || !loadedVersion) return;
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    const away = hiddenAt ? Date.now() - hiddenAt : 0;
+    if (!loadedVersion) return;
     const v = await version().catch(() => null);
-    if (v && v !== loadedVersion && !document.hidden && !busy() && !document.querySelector(".sheet-bg.show")) location.reload();
+    if (v && v !== loadedVersion) updateReady = true;
+    maybeUpdate(away > 30 * 60 * 1000);
   });
 
   // ---- YouTube player ----
