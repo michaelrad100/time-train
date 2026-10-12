@@ -286,13 +286,13 @@
   .intro .brand { margin: 0; }
   .intro .board .stop { margin: 8px 0 6px; }
   .intro .board p { margin: 0 0 14px; color: #c6cbe6; font-size: 16px; line-height: 1.4; }
+  .intro .board a { color: #fff; text-decoration: underline; text-decoration-color: var(--amber); text-underline-offset: 3px; }
   .intro h3 { margin: 4px 0 0; font-family: var(--sign); font-weight: 400; font-size: 17px; letter-spacing: .03em; }
   .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-  .steps li { display: flex; gap: 14px; align-items: flex-start; background: var(--card); border: 2px solid var(--rule); border-radius: 18px; padding: 12px 14px; }
+  .steps li { display: flex; gap: 14px; align-items: center; background: var(--card); border: 2px solid var(--rule); border-radius: 18px; padding: 12px 14px; }
   .steps li > b { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--sign); font-weight: 400; font-size: 16px;
     background: var(--amber); box-shadow: 0 3px 0 #d69d12; }
-  .steps li div { font-size: 15px; color: var(--muted); line-height: 1.35; }
-  .steps li div strong { display: block; color: var(--ink); font-size: 17px; font-weight: 900; margin-bottom: 2px; }
+  .steps li strong { font-size: 17px; font-weight: 900; }
   .lines { list-style: none; margin: 0; padding: 4px 0 0 4px; position: relative; }
   .lines li { position: relative; display: flex; align-items: center; gap: 12px; padding: 6px 0; font-size: 15px; }
   .lines li::before { content: ""; position: absolute; left: 8px; top: 0; bottom: 0; width: 6px; background: var(--c); }
@@ -480,13 +480,13 @@
       <section class="board">
         <span class="label">Welcome aboard</span>
         <div class="stop" id="intro-title">From the Big Bang to today</div>
-        <p id="intro-lede"></p>
+        <p>A companion to DK's <a href="https://www.penguinrandomhouse.com/books/764668/timelines-of-everything-by-dk/" target="_blank" rel="noopener"><i>Timelines of Everything</i></a></p>
       </section>
-      <h3>How the ride works</h3>
+      <h3>How this works</h3>
       <ol class="steps">
-        <li><b>1</b><div><strong>Read a timeline in the book</strong>Every stop matches a two-page spread, and the board at the top tells you which page.</div></li>
-        <li><b>2</b><div><strong>Watch the video</strong>A short video that goes a little deeper, plus a few "Did you know?" facts.</div></li>
-        <li><b>3</b><div><strong>Get your ticket punched</strong>Finish the video to earn a ticket. Then the train leaves for the next stop tomorrow.</div></li>
+        <li><b>1</b><strong>Read a timeline in the book</strong></li>
+        <li><b>2</b><strong>Watch a video to go deeper</strong></li>
+        <li><b>3</b><strong>Get your ticket punched</strong></li>
       </ol>
       <h3>Six lines to ride</h3>
       <ol class="lines" id="intro-lines"></ol>
@@ -901,7 +901,6 @@
 
   // ---- first-visit intro: shown until it's dismissed once, and never to someone who already has tickets ----
   function openIntro() {
-    $("intro-lede").textContent = `${S.length} stops through all of history, one for every timeline in DK's Timelines of Everything.`;
     $("intro-lines").innerHTML = ERA_ORDER.map(era => {
       const e = ERAS[era], n = S.filter(x => x.era === era).length;
       return `<li style="--c:${e.color}"><i></i><span><b>${e.name}</b></span><small>${e.dates}<br>${n} stops</small></li>`;
