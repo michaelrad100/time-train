@@ -313,7 +313,6 @@ window.ABOUT = {
   "-NFfSLlCawE": ["English Heritage tells Charles Darwin's life story: beetle collecting, a five-year voyage around the world, years of experiments at home with his family, and the book that shook Victorian England.", [0]],
   // p.222 The British Empire
   "Pi2S0zXJgjU": ["Newsround's young reporters interview author Sathnam Sanghera about the British Empire: what it was, how it shaped Britain today, and why we should learn both the good and the bad.", [0]],
-  "lisGM1frnjg": ["A fast, jokey cartoon about how the British Empire grew, from early explorers and India to the American Revolution, Australia, Africa, and its peak in 1921. It includes some swearing.", [0,1]],
   // p.224 The Civil War
   "ILc0nfzePT4": ["KidsKonnect walks through the Civil War: slavery and the split between North and South, Lincoln, the big battles, the Emancipation Proclamation, Lee's surrender and Lincoln's assassination.", [0,1]],
   "aVXJnA-kyog": ["Lesson Boosters explains the Civil War: why the Southern states broke away, the role of slavery, Lincoln and the Emancipation Proclamation, and Lee's surrender in 1865.", [0,1]],
